@@ -1,6 +1,6 @@
 <!-- ![Banner](./image.png) -->
 # Drift
-> Short blurb about what your product does.
+> Real-time autonomous drone mission simulator and telemetry analyzer.
 
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/Creator101-commits/drift?include_prereleases)
 ![GitHub last commit](https://img.shields.io/github/last-commit/Creator101-commits/drift)
@@ -8,13 +8,13 @@
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/Creator101-commits/drift)
 ![GitHub](https://img.shields.io/github/license/Creator101-commits/drift)
 
-Brief one to two paragraph statement about your product and what it does.
+Drift is a real-time autonomous drone mission simulator and telemetry analysis workstation built on Tauri 2, Rust, React, and SQLite. It provides deterministic 20 Hz simulation with altitude, flight modes, battery drain, crosswind dynamics, obstacle avoidance, no-fly zones, and sensor fault injection.
 
 ## Table of Contents
-- [Drift](#product-name)
+- [Drift](#drift)
 - [Quickstart / Demo](#quickstart--demo)
 - [Installation](#installation)
-- [Usage](#usage)
+- [Architecture Overview](#architecture-overview)
 - [Development](#development)
 - [Contributing](#contributing)
 - [Release History](#release-history)
@@ -24,48 +24,60 @@ Brief one to two paragraph statement about your product and what it does.
 ## Quickstart / Demo
 [(Back to top)](#table-of-contents)
 
-A short demo, screenshot, or GIF that lets the reader see the project in action in under a minute. Link to a hosted demo if you have one.
+Drift supports an end-to-end autonomous mission demonstration workflow:
+
+1. **Load Scenario**: Select "Urban Grid Surveillance" or "Canyon Wind Obstacle Challenge".
+2. **Interactive Map**: View flight bounds, obstacles, no-fly zones, and mission waypoints rendered on an HTML5 canvas.
 
 ## Installation
 [(Back to top)](#table-of-contents)
 
-> **Note**: For longer README files, a "Back to top" link like the one above makes it easy to navigate.
-
-Add snippets here that your readers can copy-paste with one click.
+Prerequisites:
+- Node.js (v18+) and npm
+- Rust toolchain (cargo 1.77+)
 
 **macOS & Linux**
 
 ```sh
-npm install drift --save
+# Clone repository
+git clone https://github.com/Creator101-commits/drift.git
+cd drift
+
+# Install frontend dependencies
+npm install
+
+# Run frontend build
+npm run build
 ```
 
 **Windows**
 
 ```sh
-npm install drift --save
+git clone https://github.com/Creator101-commits/drift.git
+cd drift
+npm install
+npm run build
 ```
 
-## Usage
+## Architecture Overview
 [(Back to top)](#table-of-contents)
 
-Explain how to use your project here. Create subsections for different features or workflows so users can find what they need quickly.
-
-```sh
-drift --help
-```
+- **Frontend**: React 18, TypeScript, Vite, HTML5 Canvas 2D tactical mission map.
+- **Desktop Runtime**: Tauri 2 native desktop bridge.
+- **Simulation Models**: Explicit typed structs for drone state, flight modes, waypoints, obstacles, and geofence bounds.
 
 ## Development
 [(Back to top)](#table-of-contents)
 
-Instructions for setting up a local development environment so you can build and run the project from source.
-
 ```sh
-git clone https://github.com/Creator101-commits/drift.git
-cd drift
-# install dependencies
+# Install dependencies
 npm install
-# run in development mode
-npm run dev
+
+# Run frontend build
+npm run build
+
+# Run in desktop development mode
+npm run tauri dev
 ```
 
 ## Contributing
@@ -85,9 +97,10 @@ Please make sure tests pass and the code is formatted before opening a PR.
 [(Back to top)](#table-of-contents)
 
 * 0.1.0
-    * The first proper release
-* 0.0.1
-    * Work in progress
+    * Foundation release: Tauri 2, Rust simulation core, React + TypeScript frontend
+    * Interactive 2D tactical mission map rendering boundaries, obstacles, and waypoints
+    * Seeded scenario loading (Urban Grid Surveillance, Canyon Wind Challenge)
+    * Real-time telemetry data models for autonomous flight state
 
 ## License
 [(Back to top)](#table-of-contents)
