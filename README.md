@@ -64,7 +64,16 @@ npm run build
 
 - **Frontend**: React 18, TypeScript, Vite, HTML5 Canvas 2D tactical mission map.
 - **Desktop Runtime**: Tauri 2 native desktop bridge.
-- **Simulation Models**: Explicit typed structs for drone state, flight modes, waypoints, obstacles, and geofence bounds.
+- **Simulation Engine**: Fixed-timestep 20 Hz loop (dt = 0.05s) simulating aerodynamic drag, crosswind, battery consumption, and obstacle boundary collisions.
+
+## Drone Dynamics & 20 Hz Simulation Engine
+[(Back to top)](#table-of-contents)
+
+Drift features a fixed-timestep 20 Hz (dt = 0.05s) simulation engine written in Rust:
+- **Kinematics**: 2.5D position (x, y, altitude), horizontal/vertical velocity vectors, heading orientation.
+- **Environmental Physics**: Continuous crosswind and gust velocity vectors affecting drone trajectory.
+- **Battery Dynamics**: Base avionics power drain plus quadratic rotor thrust discharge during climb and acceleration.
+- **Safety Boundaries**: Physical map bounds, spherical obstacle collision boundaries, and polygonal no-fly zones.
 
 ## Development
 [(Back to top)](#table-of-contents)
