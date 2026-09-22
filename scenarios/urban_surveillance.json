@@ -1,0 +1,81 @@
+{
+  "id": "SCN-URBAN-01",
+  "name": "Urban Grid Surveillance",
+  "description": "Dense city district with building obstacles, central no-fly zone, and moderate crosswinds.",
+  "seed": 42,
+  "boundary": {
+    "min_x": 0.0,
+    "max_x": 400.0,
+    "min_y": 0.0,
+    "max_y": 400.0,
+    "max_altitude": 100.0
+  },
+  "home_x": 40.0,
+  "home_y": 40.0,
+  "obstacles": [
+    {
+      "id": "BLD-01",
+      "name": "Alpha Tower",
+      "x": 130.0,
+      "y": 140.0,
+      "radius": 26.0,
+      "height": 60.0
+    },
+    {
+      "id": "BLD-02",
+      "name": "Bravo Center",
+      "x": 230.0,
+      "y": 160.0,
+      "radius": 32.0,
+      "height": 75.0
+    },
+    {
+      "id": "BLD-03",
+      "name": "Charlie Plaza",
+      "x": 170.0,
+      "y": 280.0,
+      "radius": 28.0,
+      "height": 50.0
+    },
+    {
+      "id": "BLD-04",
+      "name": "Delta Heights",
+      "x": 290.0,
+      "y": 290.0,
+      "radius": 30.0,
+      "height": 70.0
+    },
+    {
+      "id": "TWR-05",
+      "name": "Communications Mast",
+      "x": 310.0,
+      "y": 110.0,
+      "radius": 18.0,
+      "height": 85.0
+    }
+  ],
+  "no_fly_zones": [
+    {
+      "id": "NFZ-GOV-01",
+      "name": "Civic Airspace Restricted",
+      "center_x": 200.0,
+      "center_y": 215.0,
+      "radius": 34.0,
+      "min_alt": 0.0,
+      "max_alt": 120.0
+    }
+  ],
+  "waypoints": [
+    { "id": 1, "x": 75.0, "y": 150.0, "altitude": 20.0, "speed_target": 8.0 },
+    { "id": 2, "x": 190.0, "y": 90.0, "altitude": 25.0, "speed_target": 10.0 },
+    { "id": 3, "x": 330.0, "y": 200.0, "altitude": 30.0, "speed_target": 10.0 },
+    { "id": 4, "x": 260.0, "y": 350.0, "altitude": 25.0, "speed_target": 9.0 },
+    { "id": 5, "x": 80.0, "y": 300.0, "altitude": 20.0, "speed_target": 8.0 }
+  ],
+  "wind": {
+    "speed_mps": 3.2,
+    "direction_deg": 55.0,
+    "gust_amplitude": 1.4,
+    "gust_period": 5.0
+  }
+}

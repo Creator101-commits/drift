@@ -1,0 +1,61 @@
+{
+  "id": "SCN-CANYON-02",
+  "name": "Canyon Wind Obstacle Challenge",
+  "description": "Narrow corridor flanked by rock pillars with high turbulence and gusts.",
+  "seed": 1337,
+  "boundary": {
+    "min_x": 0.0,
+    "max_x": 400.0,
+    "min_y": 0.0,
+    "max_y": 400.0,
+    "max_altitude": 120.0
+  },
+  "home_x": 30.0,
+  "home_y": 200.0,
+  "obstacles": [
+    {
+      "id": "OBS-01",
+      "name": "North Ridge",
+      "x": 140.0,
+      "y": 280.0,
+      "radius": 45.0,
+      "height": 90.0
+    },
+    {
+      "id": "OBS-02",
+      "name": "South Ridge",
+      "x": 140.0,
+      "y": 120.0,
+      "radius": 45.0,
+      "height": 90.0
+    },
+    {
+      "id": "OBS-03",
+      "name": "Center Pillar",
+      "x": 230.0,
+      "y": 200.0,
+      "radius": 22.0,
+      "height": 80.0
+    },
+    {
+      "id": "OBS-04",
+      "name": "East Wall",
+      "x": 320.0,
+      "y": 240.0,
+      "radius": 35.0,
+      "height": 90.0
+    }
+  ],
+  "no_fly_zones": [],
+  "waypoints": [
+    { "id": 1, "x": 110.0, "y": 200.0, "altitude": 25.0, "speed_target": 9.0 },
+    { "id": 2, "x": 230.0, "y": 270.0, "altitude": 30.0, "speed_target": 10.0 },
+    { "id": 3, "x": 340.0, "y": 160.0, "altitude": 25.0, "speed_target": 8.0 }
+  ],
+  "wind": {
+    "speed_mps": 6.2,
+    "direction_deg": 90.0,
+    "gust_amplitude": 2.8,
+    "gust_period": 4.0
+  }
+}
