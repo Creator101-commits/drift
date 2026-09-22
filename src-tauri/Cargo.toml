@@ -1,0 +1,25 @@
+[package]
+name = "drift"
+version = "0.1.0"
+description = "Autonomous Drone Mission Simulator and Telemetry Analyzer"
+authors = ["Sreeharsha Kannegundla"]
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "drift_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6.3" }
+
+[dependencies]
+tauri = { version = "2.11.6" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rusqlite = { version = "0.32", features = ["bundled"] }
+chrono = { version = "0.4", features = ["serde"] }
+rand = "0.8"
+rand_chacha = "0.3"
+tokio = { version = "1", features = ["full"] }
+log = "0.4"
