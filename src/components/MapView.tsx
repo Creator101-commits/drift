@@ -36,6 +36,8 @@ export const MapView: React.FC<MapViewProps> = ({
 
   // Layer visibility toggles
   const [showLidar, setShowLidar] = useState<boolean>(true);
+  const [showRawTrail, setShowRawTrail] = useState<boolean>(true);
+  const [showFilteredTrail, setShowFilteredTrail] = useState<boolean>(true);
   const [showGrid, setShowGrid] = useState<boolean>(true);
 
   // World to canvas coordinate conversion
