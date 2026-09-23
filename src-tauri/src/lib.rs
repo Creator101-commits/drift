@@ -1,5 +1,6 @@
-//! Drift desktop application core runtime, simulation, and sensor system.
+//! Drift desktop application core runtime, simulation, sensors, and navigation.
 
+pub mod navigation;
 pub mod sensors;
 pub mod simulation;
 
@@ -30,6 +31,16 @@ fn clear_sensor_faults() -> Result<String, String> {
     Ok("Cleared all active sensor faults".into())
 }
 
+#[tauri::command]
+fn plan_route_to(target_x: f64, target_y: f64) -> Result<String, String> {
+    Ok(format!("Planned A* path to ({:.1}, {:.1})", target_x, target_y))
+}
+
+#[tauri::command]
+fn return_to_home() -> Result<String, String> {
+    Ok("Return to home commanded".into())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -38,7 +49,9 @@ pub fn run() {
             start_simulation,
             step_simulation,
             inject_sensor_fault,
-            clear_sensor_faults
+            clear_sensor_faults,
+            plan_route_to,
+            return_to_home
         ])
         .run(tauri::generate_context!())
         .expect("error while running drift application");

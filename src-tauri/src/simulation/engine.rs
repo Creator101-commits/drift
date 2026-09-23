@@ -6,6 +6,10 @@ use serde::{Deserialize, Serialize};
 
 use super::drone::{Drone, DroneState, FlightMode, Waypoint};
 use super::physics::{Boundary, NoFlyZone, Obstacle, Vec2, WindCondition};
+use crate::navigation::{
+    AStarPlanner, LocalizationState, OccupancyGrid, PathPoint, SafetyMonitor, SafetyStatus,
+    StateEstimator,
+};
 use crate::sensors::{FaultType, SensorReading, SensorSuite};
 
 /// Mission event recorded in chronological log.
@@ -38,7 +42,12 @@ pub struct ScenarioConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SimulationSnapshot {
     pub drone: DroneState,
+    pub localization: LocalizationState,
     pub sensor_readings: Vec<SensorReading>,
+    pub safety: SafetyStatus,
+    pub planned_route: Vec<Vec2>,
+    pub raw_trail: Vec<PathPoint>,
+    pub filtered_trail: Vec<PathPoint>,
     pub active_faults: Vec<FaultType>,
     pub sim_time_sec: f64,
     pub tick_count: u64,
@@ -55,6 +64,10 @@ pub struct SimulationEngine {
     pub waypoints: Vec<Waypoint>,
     pub wind: WindCondition,
     pub sensors: SensorSuite,
+    pub estimator: StateEstimator,
+    pub occupancy_grid: OccupancyGrid,
+    pub planned_route: Vec<Vec2>,
+    pub current_route_index: usize,
     pub events: Vec<MissionEvent>,
     pub rng: ChaCha8Rng,
     pub seed: u64,
@@ -81,14 +94,19 @@ impl SimulationEngine {
         let home_y = 40.0;
         let rng = ChaCha8Rng::seed_from_u64(seed);
 
+        let occupancy = OccupancyGrid::build(&default_boundary, 2.5, 3.0, &[], &[]);
         Self {
             drone: Drone::new(home_x, home_y),
             boundary: default_boundary,
             obstacles: Vec::new(),
             no_fly_zones: Vec::new(),
             waypoints: Vec::new(),
+            planned_route: Vec::new(),
+            current_route_index: 0,
             wind: WindCondition::default(),
             sensors: SensorSuite::new(),
+            estimator: StateEstimator::new(home_x, home_y),
+            occupancy_grid: occupancy,
             events: Vec::new(),
             rng,
             seed,
@@ -109,13 +127,23 @@ impl SimulationEngine {
         self.waypoints = scenario.waypoints.clone();
         self.wind = scenario.wind.clone();
 
+        self.occupancy_grid = OccupancyGrid::build(
+            &self.boundary,
+            2.5,
+            3.0,
+            &self.obstacles,
+            &self.no_fly_zones,
+        );
         self.reset_to_home(scenario.home_x, scenario.home_y);
         self.log_event("SCENARIO_LOADED", &format!("Scenario '{}' loaded with seed {}", scenario.name, scenario.seed), None);
     }
 
     pub fn reset_to_home(&mut self, home_x: f64, home_y: f64) {
         self.drone = Drone::new(home_x, home_y);
+        self.estimator.reset(home_x, home_y);
         self.sensors.clear_all_faults();
+        self.planned_route.clear();
+        self.current_route_index = 0;
         self.sim_time_sec = 0.0;
         self.tick_count = 0;
         self.is_paused = true;
@@ -186,6 +214,46 @@ impl SimulationEngine {
         self.log_event("ALL_FAULTS_CLEARED", "Restored all sensors to nominal state", None);
     }
 
+    pub fn plan_and_follow_route_to(&mut self, goal_x: f64, goal_y: f64, altitude: f64) -> Result<Vec<Vec2>, String> {
+        let start_w = Vec2::new(self.drone.state.x, self.drone.state.y);
+        let goal_w = Vec2::new(goal_x, goal_y);
+
+        if let Some(path) = AStarPlanner::plan_path(&self.occupancy_grid, &start_w, &goal_w) {
+            if path.len() < 2 {
+                return Err("Path planning returned trivial path".to_string());
+            }
+            self.planned_route = path.clone();
+            self.current_route_index = 1;
+            self.drone.set_waypoint(Waypoint {
+                id: 1,
+                x: path[1].x,
+                y: path[1].y,
+                altitude,
+                speed_target: self.drone.config.max_horizontal_speed,
+            });
+
+            self.log_event(
+                "ROUTE_PLANNED",
+                &format!("A* path generated with {} waypoints to ({:.1}, {:.1})", path.len(), goal_x, goal_y),
+                None,
+            );
+            Ok(path)
+        } else {
+            Err("No obstacle-free route found to destination".to_string())
+        }
+    }
+
+    pub fn select_waypoint(&mut self, waypoint_id: usize) -> Result<(), String> {
+        if let Some(wp) = self.waypoints.iter().find(|w| w.id == waypoint_id).cloned() {
+            self.plan_and_follow_route_to(wp.x, wp.y, wp.altitude)?;
+            self.drone.state.current_waypoint_index = Some(waypoint_id);
+            self.log_event("WAYPOINT_SELECTED", &format!("Targeting scenario waypoint #{}", waypoint_id), None);
+            Ok(())
+        } else {
+            Err(format!("Waypoint #{} not found in scenario", waypoint_id))
+        }
+    }
+
     /// Single simulation step at dt = 0.05 seconds (20 Hz).
     pub fn step(&mut self) -> SimulationSnapshot {
         let dt = self.time_step;
@@ -221,9 +289,47 @@ impl SimulationEngine {
         let readings = self.sensors.sample(&self.drone.state, &self.boundary, &self.obstacles, &mut self.rng);
         let active_faults = self.sensors.get_active_faults();
 
+        // 5. Waypoint progression along planned route
+        if !self.planned_route.is_empty() && self.current_route_index < self.planned_route.len() {
+            let target = &self.planned_route[self.current_route_index];
+            let dist = ((self.drone.state.x - target.x).powi(2) + (self.drone.state.y - target.y).powi(2)).sqrt();
+            if dist < 3.0 {
+                self.current_route_index += 1;
+                if self.current_route_index < self.planned_route.len() {
+                    let next = &self.planned_route[self.current_route_index];
+                    self.drone.set_waypoint(Waypoint {
+                        id: self.current_route_index,
+                        x: next.x,
+                        y: next.y,
+                        altitude: self.drone.state.altitude,
+                        speed_target: self.drone.config.max_horizontal_speed,
+                    });
+                }
+            }
+        }
+
+        // 6. Localization estimator
+        let (raw_gps, imu_accel, compass_hdg, baro_alt) = self.sensors.get_nav_signals();
+        let loc = self.estimator.predict_and_update(
+            dt,
+            imu_accel,
+            compass_hdg,
+            baro_alt,
+            raw_gps,
+            self.drone.state.flight_mode == FlightMode::Grounded,
+        );
+
+        // 7. Safety monitor
+        let safety = SafetyMonitor::evaluate(&self.drone.state, &self.boundary, &self.obstacles, &self.no_fly_zones);
+
         SimulationSnapshot {
             drone: self.drone.state.clone(),
+            localization: loc,
             sensor_readings: readings,
+            safety,
+            planned_route: self.planned_route.clone(),
+            raw_trail: self.estimator.get_raw_trail(),
+            filtered_trail: self.estimator.get_filtered_trail(),
             active_faults,
             sim_time_sec: self.sim_time_sec,
             tick_count: self.tick_count,

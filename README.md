@@ -105,6 +105,11 @@ Please make sure tests pass and the code is formatted before opening a PR.
 ## Release History
 [(Back to top)](#table-of-contents)
 
+* 0.3.0
+    * Occupancy grid construction with obstacle dilation for safety buffers
+    * A* autonomous route planner with dynamic obstacle avoidance
+    * Kalman-style state estimator tracking dual raw GPS vs filtered positions
+    * Geofence boundary violation warnings, collision risk alerts, and automated RTH
 * 0.2.0
     * Simulated flight sensor suite: GPS, 6-DOF IMU, Digital Compass, Barometer, 16-beam LiDAR
     * Deterministic seeded noise via ChaCha8 PRNG for repeatable test runs
@@ -147,3 +152,12 @@ Drift supports on-the-fly fault injection to simulate real-world hardware degrad
 - **Compass Lock**: Heading lock or magnetic interference.
 - **Altimeter Drift**: Barometric bias causing vertical tracking error.
 - **LiDAR Blind Spots**: Laser emitter occlusions.
+
+
+## Autonomous Navigation & State Estimation
+[(Back to top)](#table-of-contents)
+
+- **Occupancy Grid**: Continuous obstacle map discretized into a 2D occupancy grid with configurable safety dilation margins.
+- **A* Route Planning**: 8-directional heuristic search with line-of-sight path smoothing avoiding obstacles and restricted airspace.
+- **Kalman-Style State Estimator**: Combines noisy GPS measurements with high-rate IMU dead reckoning and barometric altitude. The map renders both raw GPS breadcrumbs and stable filtered trajectories simultaneously.
+- **Safety Monitor**: Real-time evaluation of geofence margins, collision proximity risks, automated Return-to-Home (RTH), and emergency descent.
