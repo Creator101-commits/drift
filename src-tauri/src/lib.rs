@@ -1,6 +1,9 @@
-//! Drift desktop application core runtime and simulation engine.
+//! Drift desktop application core runtime, simulation, and sensor system.
 
+pub mod sensors;
 pub mod simulation;
+
+use sensors::FaultType;
 
 #[tauri::command]
 fn load_scenario_manifest(scenario_id: String) -> Result<String, String> {
@@ -17,13 +20,25 @@ fn step_simulation() -> Result<String, String> {
     Ok("Step completed".into())
 }
 
+#[tauri::command]
+fn inject_sensor_fault(fault: FaultType) -> Result<String, String> {
+    Ok(format!("Injected sensor fault: {:?}", fault))
+}
+
+#[tauri::command]
+fn clear_sensor_faults() -> Result<String, String> {
+    Ok("Cleared all active sensor faults".into())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             load_scenario_manifest,
             start_simulation,
-            step_simulation
+            step_simulation,
+            inject_sensor_fault,
+            clear_sensor_faults
         ])
         .run(tauri::generate_context!())
         .expect("error while running drift application");
