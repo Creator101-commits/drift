@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use super::drone::{Drone, DroneState, FlightMode, Waypoint};
 use super::physics::{Boundary, NoFlyZone, Obstacle, Vec2, WindCondition};
+use crate::sensors::{FaultType, SensorReading, SensorSuite};
 
 /// Mission event recorded in chronological log.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -37,6 +38,8 @@ pub struct ScenarioConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SimulationSnapshot {
     pub drone: DroneState,
+    pub sensor_readings: Vec<SensorReading>,
+    pub active_faults: Vec<FaultType>,
     pub sim_time_sec: f64,
     pub tick_count: u64,
     pub wind_vector: Vec2,
@@ -51,6 +54,7 @@ pub struct SimulationEngine {
     pub no_fly_zones: Vec<NoFlyZone>,
     pub waypoints: Vec<Waypoint>,
     pub wind: WindCondition,
+    pub sensors: SensorSuite,
     pub events: Vec<MissionEvent>,
     pub rng: ChaCha8Rng,
     pub seed: u64,
@@ -84,6 +88,7 @@ impl SimulationEngine {
             no_fly_zones: Vec::new(),
             waypoints: Vec::new(),
             wind: WindCondition::default(),
+            sensors: SensorSuite::new(),
             events: Vec::new(),
             rng,
             seed,
@@ -110,6 +115,7 @@ impl SimulationEngine {
 
     pub fn reset_to_home(&mut self, home_x: f64, home_y: f64) {
         self.drone = Drone::new(home_x, home_y);
+        self.sensors.clear_all_faults();
         self.sim_time_sec = 0.0;
         self.tick_count = 0;
         self.is_paused = true;
@@ -165,6 +171,21 @@ impl SimulationEngine {
         self.log_event("HOVER_MODE", "Holding station at current coordinates", None);
     }
 
+    pub fn inject_fault(&mut self, fault: FaultType) {
+        self.sensors.inject_fault(fault);
+        self.log_event("FAULT_INJECTED", &format!("Injected sensor fault: {}", fault), None);
+    }
+
+    pub fn clear_fault(&mut self, fault: FaultType) {
+        self.sensors.clear_fault(fault);
+        self.log_event("FAULT_CLEARED", &format!("Cleared sensor fault: {}", fault), None);
+    }
+
+    pub fn clear_all_faults(&mut self) {
+        self.sensors.clear_all_faults();
+        self.log_event("ALL_FAULTS_CLEARED", "Restored all sensors to nominal state", None);
+    }
+
     /// Single simulation step at dt = 0.05 seconds (20 Hz).
     pub fn step(&mut self) -> SimulationSnapshot {
         let dt = self.time_step;
@@ -196,8 +217,14 @@ impl SimulationEngine {
             }
         }
 
+        // Sample sensor suite with seeded ChaCha8 PRNG
+        let readings = self.sensors.sample(&self.drone.state, &self.boundary, &self.obstacles, &mut self.rng);
+        let active_faults = self.sensors.get_active_faults();
+
         SimulationSnapshot {
             drone: self.drone.state.clone(),
+            sensor_readings: readings,
+            active_faults,
             sim_time_sec: self.sim_time_sec,
             tick_count: self.tick_count,
             wind_vector: wind_vec,

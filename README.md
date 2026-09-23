@@ -105,6 +105,11 @@ Please make sure tests pass and the code is formatted before opening a PR.
 ## Release History
 [(Back to top)](#table-of-contents)
 
+* 0.2.0
+    * Simulated flight sensor suite: GPS, 6-DOF IMU, Digital Compass, Barometer, 16-beam LiDAR
+    * Deterministic seeded noise via ChaCha8 PRNG for repeatable test runs
+    * Real-time fault injection: GPS drift/dropout, IMU bias, compass lock, altimeter drift, LiDAR blind spots
+    * Live sensor-health telemetry status monitoring in frontend
 * 0.1.0
     * Foundation release: Tauri 2, Rust simulation core, React + TypeScript frontend
     * Interactive 2D tactical mission map rendering boundaries, obstacles, and waypoints
@@ -122,3 +127,23 @@ Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more informati
 Sreeharsha Kannegundla – [@Creator101-commits](https://github.com/Creator101-commits)
 
 Project link: [https://github.com/Creator101-commits/drift](https://github.com/Creator101-commits/drift)
+
+
+## Simulated Flight Sensor Suite & Fault Injection
+[(Back to top)](#table-of-contents)
+
+Each sensor produces timestamped readings generated from a seeded ChaCha8 PRNG:
+- **GPS Receiver**: Longitude, latitude, horizontal speed, fix quality, dilution of precision.
+- **6-DOF IMU**: 3-axis accelerometer and 3-axis angular gyroscope rates with temperature compensation.
+- **Digital Compass**: Magnetometer heading in degrees [0, 360) with magnetic declination offset.
+- **Barometric Altimeter**: Atmospheric pressure sensor measuring relative altitude with altitude drift models.
+- **16-Beam LiDAR**: Radial ray-casting scanner measuring distances to scenario obstacles and terrain.
+
+### Deterministic Sensor Faults
+Drift supports on-the-fly fault injection to simulate real-world hardware degradation:
+- **GPS Drift**: Systematic wander in estimated coordinates.
+- **GPS Dropout**: Complete loss of satellite fix.
+- **IMU Bias**: Steady acceleration / gyroscope offset causing attitude drift.
+- **Compass Lock**: Heading lock or magnetic interference.
+- **Altimeter Drift**: Barometric bias causing vertical tracking error.
+- **LiDAR Blind Spots**: Laser emitter occlusions.
