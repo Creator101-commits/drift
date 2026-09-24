@@ -1,5 +1,7 @@
-//! Drift desktop application core runtime, simulation, sensors, and navigation.
+//! Drift desktop application core runtime, simulation, sensors, navigation, alerts, and database.
 
+pub mod analysis;
+pub mod db;
 pub mod navigation;
 pub mod sensors;
 pub mod simulation;
@@ -41,6 +43,12 @@ fn return_to_home() -> Result<String, String> {
     Ok("Return to home commanded".into())
 }
 
+#[tauri::command]
+fn get_saved_missions() -> Result<Vec<db::MissionSummaryRow>, String> {
+    let db = db::MissionDatabase::open()?;
+    db.list_missions().map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -51,7 +59,8 @@ pub fn run() {
             inject_sensor_fault,
             clear_sensor_faults,
             plan_route_to,
-            return_to_home
+            return_to_home,
+            get_saved_missions
         ])
         .run(tauri::generate_context!())
         .expect("error while running drift application");
