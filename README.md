@@ -105,6 +105,11 @@ Please make sure tests pass and the code is formatted before opening a PR.
 ## Release History
 [(Back to top)](#table-of-contents)
 
+* 0.4.0
+    * Professional 3-panel resizable desktop workstation layout
+    * Real-time telemetry sparklines: altitude, ground speed, battery discharge, crosswind
+    * Mission command controls: arm, takeoff, hover, return-to-home, emergency land
+    * Chronological mission event stream logging flight mode transitions and boundary events
 * 0.3.0
     * Occupancy grid construction with obstacle dilation for safety buffers
     * A* autonomous route planner with dynamic obstacle avoidance
@@ -161,3 +166,12 @@ Drift supports on-the-fly fault injection to simulate real-world hardware degrad
 - **A* Route Planning**: 8-directional heuristic search with line-of-sight path smoothing avoiding obstacles and restricted airspace.
 - **Kalman-Style State Estimator**: Combines noisy GPS measurements with high-rate IMU dead reckoning and barometric altitude. The map renders both raw GPS breadcrumbs and stable filtered trajectories simultaneously.
 - **Safety Monitor**: Real-time evaluation of geofence margins, collision proximity risks, automated Return-to-Home (RTH), and emergency descent.
+
+
+## Desktop Workstation Layout & Telemetry Visualization
+[(Back to top)](#table-of-contents)
+
+Drift features an engineering desktop layout with three resizable panels (`react-resizable-panels`):
+- **Left Panel**: Scenario selection, mission controls (Arm, Takeoff, Hover, RTH, Land), drone configuration, and sensor fault toggles.
+- **Center Panel**: High-performance HTML5 Canvas tactical map rendering boundaries, obstacles, no-fly zones, waypoints, planned A* paths, LiDAR ray sweeps, and dual raw/filtered trails.
+- **Right Panel**: Real-time telemetry sparklines (altitude, speed, battery discharge), sensor health status matrix, and chronological mission event log.
