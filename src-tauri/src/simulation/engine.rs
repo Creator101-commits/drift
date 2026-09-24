@@ -10,6 +10,7 @@ use crate::navigation::{
     AStarPlanner, LocalizationState, OccupancyGrid, PathPoint, SafetyMonitor, SafetyStatus,
     StateEstimator,
 };
+use crate::analysis::{Alert, AlertManager, AnomalyEngine};
 use crate::sensors::{FaultType, SensorReading, SensorSuite};
 
 /// Mission event recorded in chronological log.
@@ -45,14 +46,15 @@ pub struct SimulationSnapshot {
     pub localization: LocalizationState,
     pub sensor_readings: Vec<SensorReading>,
     pub safety: SafetyStatus,
+    pub active_alerts: Vec<Alert>,
+    pub recent_events: Vec<MissionEvent>,
+    pub sim_time_sec: f64,
+    pub tick_count: u64,
     pub planned_route: Vec<Vec2>,
     pub raw_trail: Vec<PathPoint>,
     pub filtered_trail: Vec<PathPoint>,
     pub active_faults: Vec<FaultType>,
-    pub sim_time_sec: f64,
-    pub tick_count: u64,
     pub wind_vector: Vec2,
-    pub recent_events: Vec<MissionEvent>,
 }
 
 /// 20 Hz Fixed-Timestep Simulation Engine with deterministic PRNG seed.
@@ -66,6 +68,7 @@ pub struct SimulationEngine {
     pub sensors: SensorSuite,
     pub estimator: StateEstimator,
     pub occupancy_grid: OccupancyGrid,
+    pub alert_manager: AlertManager,
     pub planned_route: Vec<Vec2>,
     pub current_route_index: usize,
     pub events: Vec<MissionEvent>,
@@ -107,6 +110,7 @@ impl SimulationEngine {
             sensors: SensorSuite::new(),
             estimator: StateEstimator::new(home_x, home_y),
             occupancy_grid: occupancy,
+            alert_manager: AlertManager::new(),
             events: Vec::new(),
             rng,
             seed,
@@ -142,6 +146,7 @@ impl SimulationEngine {
         self.drone = Drone::new(home_x, home_y);
         self.estimator.reset(home_x, home_y);
         self.sensors.clear_all_faults();
+        self.alert_manager.clear_all();
         self.planned_route.clear();
         self.current_route_index = 0;
         self.sim_time_sec = 0.0;
@@ -322,19 +327,35 @@ impl SimulationEngine {
         // 7. Safety monitor
         let safety = SafetyMonitor::evaluate(&self.drone.state, &self.boundary, &self.obstacles, &self.no_fly_zones);
 
+        // 8. Anomaly detection and alert updates
+        let anomalies = AnomalyEngine::detect_anomalies(
+            &self.drone.state,
+            &self.sensors,
+            &self.estimator,
+            &safety,
+            self.sim_time_sec,
+        );
+        for anomaly in anomalies {
+            if let Some(alert) = self.alert_manager.fire_alert(anomaly) {
+                self.log_event("ALERT_TRIGGERED", &alert.description, None);
+            }
+        }
+        self.alert_manager.prune_resolved(self.sim_time_sec);
+
         SimulationSnapshot {
             drone: self.drone.state.clone(),
             localization: loc,
             sensor_readings: readings,
             safety,
+            active_alerts: self.alert_manager.get_active_alerts(),
+            recent_events: self.events.iter().rev().take(20).cloned().collect(),
+            sim_time_sec: self.sim_time_sec,
+            tick_count: self.tick_count,
             planned_route: self.planned_route.clone(),
             raw_trail: self.estimator.get_raw_trail(),
             filtered_trail: self.estimator.get_filtered_trail(),
             active_faults,
-            sim_time_sec: self.sim_time_sec,
-            tick_count: self.tick_count,
             wind_vector: wind_vec,
-            recent_events: self.events.iter().rev().take(20).cloned().collect(),
         }
     }
 }

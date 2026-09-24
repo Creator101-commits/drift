@@ -4,20 +4,27 @@ import {
   Activity,
   Battery,
   Clock,
+  History,
   Navigation,
   Radio,
+  Save,
+  ShieldAlert,
 } from 'lucide-react';
 import {
   getScenarioConfig,
   getSimulationState,
+  onAlertFired,
   onDroneStateChanged,
   onMissionEvent,
   onTelemetrySample,
   planRouteToPoint,
+  saveCurrentMission,
 } from './api';
+import { AlertPanel } from './components/AlertPanel';
 import { EventLog } from './components/EventLog';
 import { MapView } from './components/MapView';
 import { MissionControls } from './components/MissionControls';
+import { MissionHistory } from './components/MissionHistory';
 import { SensorHealth } from './components/SensorHealth';
 import { TelemetryPanel } from './components/TelemetryPanel';
 import {
@@ -29,7 +36,10 @@ import './App.css';
 export function App() {
   const [scenario, setScenario] = useState<ScenarioConfig | null>(null);
   const [snapshot, setSnapshot] = useState<SimulationSnapshot | null>(null);
-  const [rightTab, setRightTab] = useState<'telemetry' | 'sensors' | 'events'>('telemetry');
+  const [leftTab, setLeftTab] = useState<'controls' | 'history'>('controls');
+  const [rightTab, setRightTab] = useState<'telemetry' | 'sensors' | 'alerts' | 'events'>('telemetry');
+  const [showSaveModal, setShowSaveModal] = useState<boolean>(false);
+  const [saveMissionName, setSaveMissionName] = useState<string>('');
 
   useEffect(() => {
     let isMounted = true;
@@ -42,12 +52,14 @@ export function App() {
       if (isMounted) setSnapshot(s);
     });
     const unlistenEvent = onMissionEvent(() => {});
+    const unlistenAlert = onAlertFired(() => {});
 
     return () => {
       isMounted = false;
       unlistenState.then((u) => u());
       unlistenTelem.then((u) => u());
       unlistenEvent.then((u) => u());
+      unlistenAlert.then((u) => u());
     };
   }, []);
 
@@ -59,7 +71,15 @@ export function App() {
     }
   };
 
+  const handleSaveMission = async () => {
+    const name = saveMissionName.trim() || `Mission ${new Date().toLocaleTimeString()}`;
+    await saveCurrentMission(name);
+    setShowSaveModal(false);
+    setSaveMissionName('');
+  };
+
   const drone = snapshot?.drone;
+  const activeAlerts = snapshot?.active_alerts || [];
   const simTimeSec = snapshot?.sim_time_sec || 0;
 
   return (
@@ -92,6 +112,27 @@ export function App() {
             <Activity size={14} />
             <span>{drone?.flight_mode || 'Grounded'}</span>
           </div>
+          {activeAlerts.length > 0 && (
+            <div className="indicator-chip alert-badge" onClick={() => setRightTab('alerts')}>
+              <ShieldAlert size={14} />
+              <span>{activeAlerts.length} Active Alerts</span>
+            </div>
+          )}
+        </div>
+
+        <div className="header-actions">
+          <button className="icon-btn" onClick={() => setShowSaveModal(true)} title="Save Current Mission">
+            <Save size={16} />
+            <span>Save Run</span>
+          </button>
+          <button
+            className={`icon-btn ${leftTab === 'history' ? 'active' : ''}`}
+            onClick={() => setLeftTab(leftTab === 'history' ? 'controls' : 'history')}
+            title="Mission History & Analysis"
+          >
+            <History size={16} />
+            <span>History</span>
+          </button>
         </div>
       </header>
 
@@ -99,11 +140,18 @@ export function App() {
         {scenario && (
           <PanelGroup direction="horizontal">
             <Panel defaultSize={22} minSize={16} maxSize={30} className="panel left-panel">
-              <MissionControls
-                scenario={scenario}
-                snapshot={snapshot}
-                onSelectScenario={(s) => setScenario(s)}
-              />
+              {leftTab === 'controls' ? (
+                <MissionControls
+                  scenario={scenario}
+                  snapshot={snapshot}
+                  onSelectScenario={(s) => setScenario(s)}
+                />
+              ) : (
+                <MissionHistory
+                  onClose={() => setLeftTab('controls')}
+                  onReplayMission={() => {}}
+                />
+              )}
             </Panel>
 
             <PanelResizeHandle className="resize-handle" />
@@ -133,6 +181,12 @@ export function App() {
                   Sensors
                 </button>
                 <button
+                  className={`tab-btn ${rightTab === 'alerts' ? 'active' : ''}`}
+                  onClick={() => setRightTab('alerts')}
+                >
+                  Alerts {activeAlerts.length > 0 && `(${activeAlerts.length})`}
+                </button>
+                <button
                   className={`tab-btn ${rightTab === 'events' ? 'active' : ''}`}
                   onClick={() => setRightTab('events')}
                 >
@@ -148,12 +202,33 @@ export function App() {
                     activeFaults={snapshot?.active_faults || []}
                   />
                 )}
+                {rightTab === 'alerts' && <AlertPanel alerts={activeAlerts} />}
                 {rightTab === 'events' && <EventLog events={snapshot?.recent_events || []} />}
               </div>
             </Panel>
           </PanelGroup>
         )}
       </main>
+
+      {showSaveModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3>Save Mission Run to SQLite</h3>
+            <p className="modal-hint">Record telemetry trajectory, sensor streams, and fired alerts.</p>
+            <input
+              type="text"
+              placeholder="e.g. Surveillance Sortie A1"
+              value={saveMissionName}
+              onChange={(e) => setSaveMissionName(e.target.value)}
+              className="modal-input"
+            />
+            <div className="modal-actions">
+              <button className="secondary-btn" onClick={() => setShowSaveModal(false)}>Cancel</button>
+              <button className="primary-btn" onClick={handleSaveMission}>Save Mission</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
