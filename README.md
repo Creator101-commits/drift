@@ -105,6 +105,10 @@ Please make sure tests pass and the code is formatted before opening a PR.
 ## Release History
 [(Back to top)](#table-of-contents)
 
+* 0.5.0
+    * Multi-speed deterministic mission replay engine (0.5x, 1x, 2x, 5x, Instant)
+    * Mission scripting engine supporting TAKEOFF, GOTO, WAIT, INJECT, RTH commands
+    * Multi-format data export: full JSON mission archive, CSV telemetry series, standalone HTML report
 * 0.4.0
     * Professional 3-panel resizable desktop workstation layout
     * Real-time telemetry sparklines: altitude, ground speed, battery discharge, crosswind
@@ -175,3 +179,19 @@ Drift features an engineering desktop layout with three resizable panels (`react
 - **Left Panel**: Scenario selection, mission controls (Arm, Takeoff, Hover, RTH, Land), drone configuration, and sensor fault toggles.
 - **Center Panel**: High-performance HTML5 Canvas tactical map rendering boundaries, obstacles, no-fly zones, waypoints, planned A* paths, LiDAR ray sweeps, and dual raw/filtered trails.
 - **Right Panel**: Real-time telemetry sparklines (altitude, speed, battery discharge), sensor health status matrix, and chronological mission event log.
+
+
+## Deterministic Replay, Scripting Engine & Export Formats
+[(Back to top)](#table-of-contents)
+
+- **Multi-Speed Replay**: Replay recorded missions at 0.5x, 1x, 2x, 5x, or Instant mode. Updates map, telemetry, and event log deterministically.
+- **Mission Script Runner**: Execute automated command sequences using syntax:
+  ```text
+  TAKEOFF 20
+  WAIT 3
+  GOTO 190 90 25
+  INJECT GPS_DRIFT
+  WAIT 5
+  RETURN_HOME
+  ```
+- **Export Formats**: Export completed runs as structured JSON mission files, CSV telemetry series, or self-contained HTML audit reports.
