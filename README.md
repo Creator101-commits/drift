@@ -30,4 +30,4 @@ open "/Applications/Drift.app"
 
 The macOS build is ad-hoc signed and not notarized by Apple, so this security step may be required.
 
-For the development process, I used AI to scaffold boilerplate code and UI, and to detect bugs in my code reviews. All code was also reviewed using AI and imporved the logic to be faster and easier to use. Everything related to simulation dynamics (fixed-timestep kinematics, deterministic sensor models, Kalman filtering, A* routing, architectural choices, etc.) was done manually by me and was tested.
+For the development process, I used AI to scaffold boilerplate code and UI, and to detect bugs in my code reviews. Everything related to simulation dynamics (fixed-timestep kinematics, deterministic sensor models, Kalman filtering, A* routing, architectural choices, etc.) was done manually by me and was tested. Since I only had 3 days to build such a massive application, I had rapidly do eveyrthing with AI for design since I had no time to design it myself. Again all logic was written by me. 
