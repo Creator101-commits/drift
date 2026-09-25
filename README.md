@@ -10,11 +10,13 @@
 
 Drift is a real-time autonomous drone mission simulator and telemetry analysis workstation built on Tauri 2, Rust, React, and SQLite. It provides deterministic 20 Hz simulation with altitude, flight modes, battery drain, crosswind dynamics, obstacle avoidance, no-fly zones, and sensor fault injection.
 
+The platform includes an 8-beam to 16-beam ray-casting LiDAR sensor, barometric altimeter, 6-DOF IMU, digital compass, and multi-constellation GPS with deterministic seeded noise. An integrated Kalman-style state estimator tracks both raw and filtered positioning in real time alongside automated A* route planning, safety monitoring, mission script execution, SQLite persistence, deterministic replay, and multi-format exports (JSON, CSV, and HTML reports).
+
 ## Table of Contents
 - [Drift](#drift)
 - [Quickstart / Demo](#quickstart--demo)
 - [Installation](#installation)
-- [Architecture Overview](#architecture-overview)
+- [Usage](#usage)
 - [Development](#development)
 - [Contributing](#contributing)
 - [Release History](#release-history)
@@ -27,10 +29,20 @@ Drift is a real-time autonomous drone mission simulator and telemetry analysis w
 Drift supports an end-to-end autonomous mission demonstration workflow:
 
 1. **Load Scenario**: Select "Urban Grid Surveillance" or "Canyon Wind Obstacle Challenge".
-2. **Interactive Map**: View flight bounds, obstacles, no-fly zones, and mission waypoints rendered on an HTML5 canvas.
+2. **Arm and Takeoff**: Arm the quadcopter motors and command vertical climb to 15m hover altitude.
+3. **Select Waypoint**: Click any scenario waypoint or right-click directly on the tactical map to generate a collision-free A* route avoiding obstacles and restricted airspace.
+4. **Follow Route**: The autonomous guidance controller traverses the path while real-time telemetry streams at 20 Hz.
+5. **Inject Sensor Faults**: Toggle GPS Drift, GPS Dropout, IMU Bias, Compass Failure, or LiDAR Blind Spots.
+6. **Observe Filtered Localization**: The map simultaneously renders the noisy raw GPS breadcrumb path and the stable Kalman-filtered localization estimate.
+7. **Fires Alerts**: The anomaly engine flags sensor drift, geofence buffer proximity, and collision risks.
+8. **Return to Home / Emergency Landing**: Command automated RTH transit or immediate emergency descent.
+9. **Save Run**: Persist the completed mission telemetry and alert audit trail into SQLite.
+10. **Replay & Export**: Replay the mission at variable speeds (0.5x, 1x, 2x, 5x, Instant) and export to JSON, CSV, or standalone HTML reports.
 
 ## Installation
 [(Back to top)](#table-of-contents)
+
+> **Note**: For longer README files, a "Back to top" link like the one above makes it easy to navigate.
 
 Prerequisites:
 - Node.js (v18+) and npm
@@ -46,8 +58,8 @@ cd drift
 # Install frontend dependencies
 npm install
 
-# Run frontend build
-npm run build
+# Run backend unit and integration test suite
+cd src-tauri && cargo test && cd ..
 ```
 
 **Windows**
@@ -56,34 +68,61 @@ npm run build
 git clone https://github.com/Creator101-commits/drift.git
 cd drift
 npm install
-npm run build
+cd src-tauri && cargo test && cd ..
 ```
 
-## Architecture Overview
+## Usage
 [(Back to top)](#table-of-contents)
 
-- **Frontend**: React 18, TypeScript, Vite, HTML5 Canvas 2D tactical mission map.
-- **Desktop Runtime**: Tauri 2 native desktop bridge.
-- **Simulation Engine**: Fixed-timestep 20 Hz loop (dt = 0.05s) simulating aerodynamic drag, crosswind, battery consumption, and obstacle boundary collisions.
+### Running the Desktop Application
 
-## Drone Dynamics & 20 Hz Simulation Engine
-[(Back to top)](#table-of-contents)
+```sh
+# Start development desktop application with hot-reloading
+npm run tauri dev
+```
 
-Drift features a fixed-timestep 20 Hz (dt = 0.05s) simulation engine written in Rust:
-- **Kinematics**: 2.5D position (x, y, altitude), horizontal/vertical velocity vectors, heading orientation.
-- **Environmental Physics**: Continuous crosswind and gust velocity vectors affecting drone trajectory.
-- **Battery Dynamics**: Base avionics power drain plus quadratic rotor thrust discharge during climb and acceleration.
-- **Safety Boundaries**: Physical map bounds, spherical obstacle collision boundaries, and polygonal no-fly zones.
+### Building Release Executable
+
+```sh
+# Build optimized desktop binary package
+npm run tauri build
+```
+
+### Scripting Engine Commands
+
+Drift includes a built-in mission command runner. You can execute custom script files using syntax such as:
+
+```text
+TAKEOFF 20
+WAIT 3
+GOTO 190 90 25
+INJECT GPS_DRIFT
+WAIT 5
+GOTO 330 200 30
+CLEAR_FAULTS
+RETURN_HOME
+```
 
 ## Development
 [(Back to top)](#table-of-contents)
 
+Instructions for setting up a local development environment:
+
 ```sh
+git clone https://github.com/Creator101-commits/drift.git
+cd drift
+
 # Install dependencies
 npm install
 
 # Run frontend build
 npm run build
+
+# Run Rust cargo check and tests
+cd src-tauri
+cargo check
+cargo test
+cd ..
 
 # Run in desktop development mode
 npm run tauri dev
@@ -105,30 +144,16 @@ Please make sure tests pass and the code is formatted before opening a PR.
 ## Release History
 [(Back to top)](#table-of-contents)
 
-* 0.5.0
-    * Multi-speed deterministic mission replay engine (0.5x, 1x, 2x, 5x, Instant)
-    * Mission scripting engine supporting TAKEOFF, GOTO, WAIT, INJECT, RTH commands
-    * Multi-format data export: full JSON mission archive, CSV telemetry series, standalone HTML report
-* 0.4.0
-    * Professional 3-panel resizable desktop workstation layout
-    * Real-time telemetry sparklines: altitude, ground speed, battery discharge, crosswind
-    * Mission command controls: arm, takeoff, hover, return-to-home, emergency land
-    * Chronological mission event stream logging flight mode transitions and boundary events
-* 0.3.0
-    * Occupancy grid construction with obstacle dilation for safety buffers
-    * A* autonomous route planner with dynamic obstacle avoidance
-    * Kalman-style state estimator tracking dual raw GPS vs filtered positions
-    * Geofence boundary violation warnings, collision risk alerts, and automated RTH
-* 0.2.0
-    * Simulated flight sensor suite: GPS, 6-DOF IMU, Digital Compass, Barometer, 16-beam LiDAR
-    * Deterministic seeded noise via ChaCha8 PRNG for repeatable test runs
-    * Real-time fault injection: GPS drift/dropout, IMU bias, compass lock, altimeter drift, LiDAR blind spots
-    * Live sensor-health telemetry status monitoring in frontend
 * 0.1.0
-    * Foundation release: Tauri 2, Rust simulation core, React + TypeScript frontend
-    * Interactive 2D tactical mission map rendering boundaries, obstacles, and waypoints
-    * Seeded scenario loading (Urban Grid Surveillance, Canyon Wind Challenge)
-    * Real-time telemetry data models for autonomous flight state
+    * Initial release: fixed-timestep 20 Hz simulation engine
+    * Deterministic sensor suite with GPS, IMU, Compass, Altimeter, and 16-beam LiDAR
+    * A* occupancy grid path planner with line-of-sight path smoothing
+    * Filtered state estimator rendering raw vs filtered telemetry paths
+    * Anomaly and alert engine with configurable safety thresholds
+    * SQLite persistence with rusqlite
+    * Multi-speed deterministic replayer (0.5x to instant)
+    * Multi-format exports: JSON, CSV, and standalone HTML reports
+    * Script command runner for automated mission execution
 
 ## License
 [(Back to top)](#table-of-contents)
@@ -141,57 +166,3 @@ Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more informati
 Sreeharsha Kannegundla – [@Creator101-commits](https://github.com/Creator101-commits)
 
 Project link: [https://github.com/Creator101-commits/drift](https://github.com/Creator101-commits/drift)
-
-
-## Simulated Flight Sensor Suite & Fault Injection
-[(Back to top)](#table-of-contents)
-
-Each sensor produces timestamped readings generated from a seeded ChaCha8 PRNG:
-- **GPS Receiver**: Longitude, latitude, horizontal speed, fix quality, dilution of precision.
-- **6-DOF IMU**: 3-axis accelerometer and 3-axis angular gyroscope rates with temperature compensation.
-- **Digital Compass**: Magnetometer heading in degrees [0, 360) with magnetic declination offset.
-- **Barometric Altimeter**: Atmospheric pressure sensor measuring relative altitude with altitude drift models.
-- **16-Beam LiDAR**: Radial ray-casting scanner measuring distances to scenario obstacles and terrain.
-
-### Deterministic Sensor Faults
-Drift supports on-the-fly fault injection to simulate real-world hardware degradation:
-- **GPS Drift**: Systematic wander in estimated coordinates.
-- **GPS Dropout**: Complete loss of satellite fix.
-- **IMU Bias**: Steady acceleration / gyroscope offset causing attitude drift.
-- **Compass Lock**: Heading lock or magnetic interference.
-- **Altimeter Drift**: Barometric bias causing vertical tracking error.
-- **LiDAR Blind Spots**: Laser emitter occlusions.
-
-
-## Autonomous Navigation & State Estimation
-[(Back to top)](#table-of-contents)
-
-- **Occupancy Grid**: Continuous obstacle map discretized into a 2D occupancy grid with configurable safety dilation margins.
-- **A* Route Planning**: 8-directional heuristic search with line-of-sight path smoothing avoiding obstacles and restricted airspace.
-- **Kalman-Style State Estimator**: Combines noisy GPS measurements with high-rate IMU dead reckoning and barometric altitude. The map renders both raw GPS breadcrumbs and stable filtered trajectories simultaneously.
-- **Safety Monitor**: Real-time evaluation of geofence margins, collision proximity risks, automated Return-to-Home (RTH), and emergency descent.
-
-
-## Desktop Workstation Layout & Telemetry Visualization
-[(Back to top)](#table-of-contents)
-
-Drift features an engineering desktop layout with three resizable panels (`react-resizable-panels`):
-- **Left Panel**: Scenario selection, mission controls (Arm, Takeoff, Hover, RTH, Land), drone configuration, and sensor fault toggles.
-- **Center Panel**: High-performance HTML5 Canvas tactical map rendering boundaries, obstacles, no-fly zones, waypoints, planned A* paths, LiDAR ray sweeps, and dual raw/filtered trails.
-- **Right Panel**: Real-time telemetry sparklines (altitude, speed, battery discharge), sensor health status matrix, and chronological mission event log.
-
-
-## Deterministic Replay, Scripting Engine & Export Formats
-[(Back to top)](#table-of-contents)
-
-- **Multi-Speed Replay**: Replay recorded missions at 0.5x, 1x, 2x, 5x, or Instant mode. Updates map, telemetry, and event log deterministically.
-- **Mission Script Runner**: Execute automated command sequences using syntax:
-  ```text
-  TAKEOFF 20
-  WAIT 3
-  GOTO 190 90 25
-  INJECT GPS_DRIFT
-  WAIT 5
-  RETURN_HOME
-  ```
-- **Export Formats**: Export completed runs as structured JSON mission files, CSV telemetry series, or self-contained HTML audit reports.

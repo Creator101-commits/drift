@@ -485,7 +485,11 @@ fn export_mission_html(state: State<'_, AppState>, mission_id: String) -> Result
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let db_path = "drift_data.db";
+    let db_path = if std::path::Path::new("../src-tauri").exists() {
+        "../drift_data.db"
+    } else {
+        "drift_data.db"
+    };
     let db = match MissionDatabase::new(db_path) {
         Ok(d) => Arc::new(d),
         Err(_) => Arc::new(MissionDatabase::new_in_memory().expect("Failed to initialize database")),
@@ -547,13 +551,13 @@ pub fn run() {
             let app_handle = app.handle().clone();
 
             // Background Simulation & Replay Loop (20 Hz nominal rate = 50ms timestep)
-            tokio::spawn(async move {
-                let mut interval = tokio::time::interval(Duration::from_millis(50));
+            std::thread::spawn(move || {
+                let tick_duration = Duration::from_millis(50);
                 let mut last_event_count = 0;
                 let mut last_alert_count = 0;
 
                 loop {
-                    interval.tick().await;
+                    std::thread::sleep(tick_duration);
 
                     let state: State<AppState> = app_handle.state();
 

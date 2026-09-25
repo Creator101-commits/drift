@@ -8,27 +8,29 @@
 
 # Drift
 
-{{One or two sentences: what this project is and does.}}
+Drift is a real-time autonomous drone mission simulator and telemetry analyzer desktop engineering application.
 
 ## Build commands
 
 ```bash
-{{install command}}
-{{test command}}       # must run with no API spend where possible
-{{build command}}
-{{lint/format command}}
+npm install                     # install frontend and build dependencies
+npm run build                   # compile TypeScript and bundle Vite frontend
+cd src-tauri && cargo test      # run backend simulation, navigation, and database test suite
+npm run tauri dev               # run desktop application in development mode
+npm run tauri build             # bundle standalone desktop application package
 ```
 
 ## Platform support
 
-- {{e.g. "macOS + Linux, Python 3.12, CPU-only" or "Tauri — macOS/Windows/Linux via CI matrix"}}
-- {{Known platform quirks or workarounds}}
+- macOS (arm64 & x86_64), Linux, Windows via Tauri 2
+- Pure native Rust simulation engine, SQLite persistence via rusqlite, React 18 frontend
 
 ## Key conventions
 
-- {{Structural rules specific to this repo — e.g. "generated files live in X, edit the source template not the output"}}
-- {{Config/state path resolution, if any}}
-- {{Anything a new session needs before touching this repo that isn't obvious from file structure}}
+- Fixed-timestep 20 Hz (dt = 0.05s) simulation loop in Rust backend
+- All sensors produce deterministic output from seeded ChaCha8 PRNG
+- SQLite persistence located at ./drift_data.db
+- Never use emojis anywhere in code, comments, commits, docs, or UI labels
 
 ---
 

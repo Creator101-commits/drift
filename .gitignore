@@ -20,8 +20,8 @@ target/
 src-tauri/target/
 
 # Local SQLite databases
-*.db
-drift_data.db
+*.db*
+drift_data.db*
 
 # Logs
 *.log
