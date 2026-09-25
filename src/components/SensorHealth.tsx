@@ -46,56 +46,57 @@ export const SensorHealth: React.FC<SensorHealthProps> = ({ readings }) => {
 
             return (
               <tr key={r.sensor_name}>
-                <td style={{ fontWeight: 600, color: '#f8fafc' }}>
+                <td style={{ fontWeight: 600, color: '#ffffff' }}>
                   {r.sensor_name.split('-')[0]}
-                  <div style={{ fontSize: 9, color: '#64748b' }}>{r.sensor_name}</div>
+                  <div style={{ fontSize: 9, color: '#71717a' }}>{r.sensor_name}</div>
                 </td>
                 <td>
                   {isNominal ? (
-                    <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <CheckCircle2 size={12} /> NOMINAL
+                    <span style={{ color: '#ffffff', display: 'flex', alignItems: 'center', gap: 5, fontSize: 10 }}>
+                      <CheckCircle2 size={12} color="#22c55e" /> NOMINAL
                     </span>
                   ) : isDegraded ? (
-                    <span style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <AlertTriangle size={12} /> DEGRADED
+                    <span style={{ color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 5, fontSize: 10 }}>
+                      <AlertTriangle size={12} color="#fbbf24" /> DEGRADED
                     </span>
                   ) : (
-                    <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <XCircle size={12} /> FAULT
+                    <span style={{ color: '#f87171', display: 'flex', alignItems: 'center', gap: 5, fontSize: 10 }}>
+                      <XCircle size={12} color="#f87171" /> FAULT
                     </span>
                   )}
                 </td>
-                <td className="mono" style={{ fontSize: 10, color: '#94a3b8' }}>
+                <td className="mono" style={{ fontSize: 10, color: '#a1a1aa' }}>
                   {metricsText}
                 </td>
                 <td>
                   {r.active_fault ? (
                     <span
                       style={{
-                        background: 'rgba(239, 68, 68, 0.15)',
+                        background: '#2b1414',
                         color: '#f87171',
-                        border: '1px solid #ef4444',
-                        padding: '1px 5px',
-                        borderRadius: 3,
+                        border: 'none',
+                        padding: '2px 8px',
+                        borderRadius: 9999,
                         fontSize: 9,
+                        fontWeight: 700,
                         textTransform: 'uppercase',
-                        fontFamily: 'monospace',
+                        letterSpacing: 0.5,
                       }}
                     >
                       {r.active_fault.replace('_', ' ')}
                     </span>
                   ) : (
-                    <span style={{ color: '#64748b', fontSize: 10 }}>--</span>
+                    <span style={{ color: '#52525b', fontSize: 10 }}>--</span>
                   )}
                 </td>
                 <td>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <div
                       style={{
-                        width: 45,
-                        height: 4,
-                        background: '#1e293b',
-                        borderRadius: 2,
+                        width: 48,
+                        height: 5,
+                        background: '#222222',
+                        borderRadius: 9999,
                         overflow: 'hidden',
                       }}
                     >
@@ -103,16 +104,17 @@ export const SensorHealth: React.FC<SensorHealthProps> = ({ readings }) => {
                         style={{
                           width: `${Math.round(r.confidence * 100)}%`,
                           height: '100%',
+                          borderRadius: 9999,
                           background:
                             r.confidence > 0.8
-                              ? '#10b981'
+                              ? '#ffffff'
                               : r.confidence > 0.5
-                              ? '#f59e0b'
-                              : '#ef4444',
+                              ? '#fbbf24'
+                              : '#f87171',
                         }}
                       />
                     </div>
-                    <span className="mono" style={{ fontSize: 10 }}>
+                    <span className="mono" style={{ fontSize: 10, color: '#ffffff' }}>
                       {Math.round(r.confidence * 100)}%
                     </span>
                   </div>

@@ -88,10 +88,10 @@ export const ReplayControl: React.FC<ReplayControlProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span
             style={{
-              background: '#06b6d4',
-              color: '#080c14',
-              padding: '2px 8px',
-              borderRadius: 4,
+              background: '#ffffff',
+              color: '#000000',
+              padding: '3px 10px',
+              borderRadius: 9999,
               fontSize: 10,
               fontWeight: 800,
               letterSpacing: 1,
@@ -101,7 +101,7 @@ export const ReplayControl: React.FC<ReplayControlProps> = ({
             REPLAY MODE
           </span>
           {activeMissionId && (
-            <span className="mono" style={{ fontSize: 11, color: '#94a3b8' }}>
+            <span className="mono" style={{ fontSize: 11, color: '#a1a1aa' }}>
               Mission: {activeMissionId}
             </span>
           )}
@@ -113,31 +113,32 @@ export const ReplayControl: React.FC<ReplayControlProps> = ({
             <>
               <button
                 className="btn btn-secondary btn-sm"
-                style={{ padding: '2px 6px', fontSize: 10 }}
+                style={{ padding: '3px 8px', fontSize: 10, borderRadius: 8 }}
                 onClick={handleExportJson}
               >
                 <FileCode size={11} /> JSON
               </button>
               <button
                 className="btn btn-secondary btn-sm"
-                style={{ padding: '2px 6px', fontSize: 10 }}
+                style={{ padding: '3px 8px', fontSize: 10, borderRadius: 8 }}
                 onClick={handleExportCsv}
               >
                 <FileSpreadsheet size={11} /> CSV
               </button>
               <button
                 className="btn btn-secondary btn-sm"
-                style={{ padding: '2px 6px', fontSize: 10 }}
+                style={{ padding: '3px 8px', fontSize: 10, borderRadius: 8 }}
                 onClick={handleExportHtml}
               >
                 <Globe size={11} /> HTML
               </button>
-              <div style={{ width: 1, height: 16, background: '#334155' }} />
+              <div style={{ width: 1, height: 16, background: '#27272a' }} />
             </>
           )}
 
           <button
             className="btn btn-secondary btn-sm"
+            style={{ borderRadius: 8 }}
             onClick={() => {
               stopReplay();
               onClose();
@@ -151,7 +152,7 @@ export const ReplayControl: React.FC<ReplayControlProps> = ({
 
       {/* Scrubber Slider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span className="mono" style={{ fontSize: 11, color: '#06b6d4', minWidth: 45 }}>
+        <span className="mono" style={{ fontSize: 11, color: '#ffffff', minWidth: 45 }}>
           {replayStatus.current_time_sec.toFixed(1)}s
         </span>
         <input
@@ -162,7 +163,7 @@ export const ReplayControl: React.FC<ReplayControlProps> = ({
           value={replayStatus.current_index}
           onChange={handleSliderChange}
         />
-        <span className="mono" style={{ fontSize: 11, color: '#64748b', minWidth: 45 }}>
+        <span className="mono" style={{ fontSize: 11, color: '#71717a', minWidth: 45 }}>
           {replayStatus.total_duration_sec.toFixed(1)}s
         </span>
       </div>
@@ -171,27 +172,27 @@ export const ReplayControl: React.FC<ReplayControlProps> = ({
       <div className="replay-controls">
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {replayStatus.is_playing ? (
-            <button className="btn btn-secondary btn-sm" onClick={() => pauseReplay()}>
+            <button className="btn btn-secondary btn-sm" style={{ borderRadius: 8 }} onClick={() => pauseReplay()}>
               <Pause size={13} /> Pause
             </button>
           ) : (
-            <button className="btn btn-primary btn-sm" onClick={() => resumeReplay()}>
+            <button className="btn btn-primary btn-sm" style={{ borderRadius: 8 }} onClick={() => resumeReplay()}>
               <Play size={13} /> Play
             </button>
           )}
-          <button className="btn btn-secondary btn-sm" onClick={() => resetReplay()}>
+          <button className="btn btn-secondary btn-sm" style={{ borderRadius: 8 }} onClick={() => resetReplay()}>
             <RotateCcw size={13} /> Restart
           </button>
         </div>
 
         {/* Speed Selector */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ fontSize: 10, color: '#94a3b8', marginRight: 4 }}>Speed:</span>
+          <span style={{ fontSize: 10, color: '#a1a1aa', marginRight: 4 }}>Speed:</span>
           {[0.5, 1.0, 2.0, 5.0, 25.0].map((spd) => (
             <button
               key={spd}
               className={`btn btn-sm ${replayStatus.playback_speed === spd ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ fontSize: 10, padding: '2px 7px' }}
+              style={{ fontSize: 10, padding: '2px 8px', borderRadius: 9999 }}
               onClick={() => setReplaySpeed(spd)}
             >
               {spd === 25.0 ? 'Instant' : `${spd}x`}

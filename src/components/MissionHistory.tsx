@@ -112,39 +112,40 @@ export const MissionHistory: React.FC<MissionHistoryProps> = ({ onStartReplay })
       </div>
 
       {missions.length === 0 ? (
-        <div style={{ padding: '16px 8px', textAlign: 'center', color: '#64748b', fontSize: 11 }}>
+        <div style={{ padding: '16px 8px', textAlign: 'center', color: '#71717a', fontSize: 11 }}>
           No recorded missions saved in SQLite yet. Complete a flight and click "Save Mission".
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 250, overflowY: 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 250, overflowY: 'auto' }}>
           {missions.map((m) => (
             <div
               key={m.id}
               style={{
-                background: '#090e17',
-                border: '1px solid #1e293b',
-                borderRadius: 6,
-                padding: '8px 10px',
+                background: '#181818',
+                border: 'none',
+                borderRadius: 12,
+                padding: '12px 14px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 6,
+                gap: 8,
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: 12 }}>{m.name}</div>
-                  <div className="mono" style={{ fontSize: 9, color: '#64748b' }}>
+                  <div style={{ fontWeight: 700, color: '#ffffff', fontSize: 12 }}>{m.name}</div>
+                  <div className="mono" style={{ fontSize: 9, color: '#71717a' }}>
                     {m.id} &bull; {m.start_time}
                   </div>
                 </div>
                 <span
                   style={{
-                    background: 'rgba(6, 182, 212, 0.15)',
-                    color: '#22d3ee',
-                    padding: '2px 6px',
-                    borderRadius: 3,
+                    background: '#27272a',
+                    color: '#ffffff',
+                    padding: '2px 8px',
+                    borderRadius: 9999,
                     fontSize: 9,
-                    fontFamily: 'monospace',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
                   }}
                 >
                   {m.status}
@@ -153,14 +154,14 @@ export const MissionHistory: React.FC<MissionHistoryProps> = ({ onStartReplay })
 
               {/* Metrics Summary */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4, fontSize: 10 }}>
-                <div style={{ color: '#94a3b8' }}>
-                  Dist: <span className="mono" style={{ color: '#f8fafc' }}>{m.total_distance.toFixed(0)}m</span>
+                <div style={{ color: '#71717a' }}>
+                  Dist: <span className="mono" style={{ color: '#ffffff' }}>{m.total_distance.toFixed(0)}m</span>
                 </div>
-                <div style={{ color: '#94a3b8' }}>
-                  Peak: <span className="mono" style={{ color: '#f8fafc' }}>{m.max_altitude.toFixed(1)}m</span>
+                <div style={{ color: '#71717a' }}>
+                  Peak: <span className="mono" style={{ color: '#ffffff' }}>{m.max_altitude.toFixed(1)}m</span>
                 </div>
-                <div style={{ color: '#94a3b8' }}>
-                  Bat: <span className="mono" style={{ color: '#f8fafc' }}>{m.battery_consumed.toFixed(1)}%</span>
+                <div style={{ color: '#71717a' }}>
+                  Bat: <span className="mono" style={{ color: '#ffffff' }}>{m.battery_consumed.toFixed(1)}%</span>
                 </div>
               </div>
 
@@ -168,7 +169,7 @@ export const MissionHistory: React.FC<MissionHistoryProps> = ({ onStartReplay })
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
                 <button
                   className="btn btn-primary btn-sm"
-                  style={{ padding: '3px 8px', fontSize: 10 }}
+                  style={{ padding: '4px 10px', fontSize: 10, borderRadius: 8 }}
                   onClick={() => onStartReplay(m.id)}
                 >
                   <Play size={11} /> Replay
@@ -177,7 +178,7 @@ export const MissionHistory: React.FC<MissionHistoryProps> = ({ onStartReplay })
                 <div style={{ display: 'flex', gap: 4 }}>
                   <button
                     className="btn btn-secondary btn-sm"
-                    style={{ padding: '3px 6px' }}
+                    style={{ padding: '4px 8px', borderRadius: 8 }}
                     onClick={() => handleExportJson(m.id)}
                     title="Export JSON"
                   >
@@ -185,7 +186,7 @@ export const MissionHistory: React.FC<MissionHistoryProps> = ({ onStartReplay })
                   </button>
                   <button
                     className="btn btn-secondary btn-sm"
-                    style={{ padding: '3px 6px' }}
+                    style={{ padding: '4px 8px', borderRadius: 8 }}
                     onClick={() => handleExportCsv(m.id)}
                     title="Export CSV Telemetry"
                   >
@@ -193,7 +194,7 @@ export const MissionHistory: React.FC<MissionHistoryProps> = ({ onStartReplay })
                   </button>
                   <button
                     className="btn btn-secondary btn-sm"
-                    style={{ padding: '3px 6px' }}
+                    style={{ padding: '4px 8px', borderRadius: 8 }}
                     onClick={() => handleExportHtml(m.id)}
                     title="Export Standalone HTML Report"
                   >
@@ -201,7 +202,7 @@ export const MissionHistory: React.FC<MissionHistoryProps> = ({ onStartReplay })
                   </button>
                   <button
                     className="btn btn-danger btn-sm"
-                    style={{ padding: '3px 6px' }}
+                    style={{ padding: '4px 8px', borderRadius: 8 }}
                     onClick={() => setConfirmDeleteId(m.id)}
                     title="Delete Saved Mission"
                   >

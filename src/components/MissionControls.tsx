@@ -155,14 +155,14 @@ RETURN_HOME`
       <div className="card-section">
         <div className="section-header">
           <span>Flight Control Guidance</span>
-          <span className="mono" style={{ color: isArmed ? '#34d399' : '#94a3b8' }}>
+          <span className="mono" style={{ color: isArmed ? '#ffffff' : '#71717a' }}>
             {isArmed ? 'ARMED' : 'DISARMED'}
           </span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
           {!isArmed ? (
-            <button className="btn btn-success" onClick={() => armDrone()}>
+            <button className="btn btn-secondary" onClick={() => armDrone()}>
               <Zap size={14} /> Arm Motors
             </button>
           ) : (
@@ -185,24 +185,24 @@ RETURN_HOME`
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 11, color: '#94a3b8' }}>Target Alt:</span>
+          <span style={{ fontSize: 11, color: '#a1a1aa' }}>Target Alt:</span>
           <input
             type="number"
             className="form-input"
-            style={{ width: 70, padding: '4px 6px' }}
+            style={{ width: 70, padding: '4px 8px' }}
             value={takeoffAlt}
             min={5}
             max={80}
             onChange={(e) => setTakeoffAlt(Number(e.target.value))}
           />
-          <span style={{ fontSize: 11, color: '#94a3b8' }}>meters</span>
+          <span style={{ fontSize: 11, color: '#71717a' }}>meters</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
           <button className="btn btn-secondary btn-sm" onClick={() => land()}>
             <ArrowDownCircle size={13} /> Land
           </button>
-          <button className="btn btn-warning btn-sm" onClick={() => returnToHome()}>
+          <button className="btn btn-secondary btn-sm" onClick={() => returnToHome()}>
             <Home size={13} /> Return Home
           </button>
         </div>
@@ -217,7 +217,7 @@ RETURN_HOME`
         <div className="section-header">
           <span>Scenario Waypoints ({scenario.waypoints.length})</span>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
           {scenario.waypoints.map((wp) => {
             const isActive = snapshot?.drone.current_waypoint_index === wp.id;
             return (
@@ -227,22 +227,22 @@ RETURN_HOME`
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '5px 8px',
-                  background: isActive ? 'rgba(245, 158, 11, 0.15)' : '#0f172a',
-                  border: `1px solid ${isActive ? '#f59e0b' : '#1e293b'}`,
-                  borderRadius: 4,
+                  padding: '7px 10px',
+                  background: isActive ? '#ffffff' : '#181818',
+                  color: isActive ? '#000000' : '#ffffff',
+                  borderRadius: 10,
                 }}
               >
                 <div>
-                  <span className="mono" style={{ fontWeight: 700, color: '#f59e0b' }}>
+                  <span className="mono" style={{ fontWeight: 700, color: isActive ? '#000000' : '#ffffff' }}>
                     WP #{wp.id}
                   </span>
-                  <span style={{ fontSize: 11, color: '#94a3b8', marginLeft: 8 }}>
-                    ({wp.x}m, {wp.y}m, alt {wp.altitude}m)
+                  <span style={{ fontSize: 10, color: isActive ? '#3f3f46' : '#71717a', marginLeft: 8 }}>
+                    ({wp.x}m, {wp.y}m, {wp.altitude}m)
                   </span>
                 </div>
                 <button
-                  className="btn btn-secondary btn-sm"
+                  className={`btn btn-sm ${isActive ? 'btn-secondary' : 'btn-primary'}`}
                   onClick={() => selectWaypoint(wp.id)}
                 >
                   Fly A*
@@ -258,7 +258,7 @@ RETURN_HOME`
         <div className="section-header">
           <span>Deterministic Fault Injection</span>
           {activeFaults.length > 0 && (
-            <span className="mono" style={{ color: '#ef4444' }}>
+            <span className="mono" style={{ color: '#ffffff' }}>
               {activeFaults.length} ACTIVE
             </span>
           )}
@@ -311,7 +311,7 @@ RETURN_HOME`
           onChange={(e) => setScriptText(e.target.value)}
         />
         {scriptStatus && (
-          <div style={{ fontSize: 11, color: '#38bdf8' }}>{scriptStatus}</div>
+          <div style={{ fontSize: 11, color: '#ffffff' }}>{scriptStatus}</div>
         )}
         <div style={{ display: 'flex', gap: 6 }}>
           <button className="btn btn-primary btn-sm" style={{ flex: 1 }} onClick={handleRunScript}>

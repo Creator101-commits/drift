@@ -58,12 +58,12 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({ snapshot }) => {
 
     ctx.clearRect(0, 0, width, height);
 
-    // Dark grid background
-    ctx.fillStyle = '#0a0f19';
+    // Dark background
+    ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, width, height);
 
     // Draw horizontal grid lines
-    ctx.strokeStyle = '#1e293b';
+    ctx.strokeStyle = '#171717';
     ctx.lineWidth = 1;
     for (let y = 0; y <= height; y += height / 4) {
       ctx.beginPath();
@@ -77,9 +77,9 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({ snapshot }) => {
     const count = history.altitude.length;
     const stepX = width / (count - 1);
 
-    // 1. Draw Altitude series (Cyan)
+    // 1. Draw Altitude series (White)
     const maxAlt = Math.max(...history.altitude, 30.0);
-    ctx.strokeStyle = '#06b6d4';
+    ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 2;
     ctx.beginPath();
     history.altitude.forEach((val, i) => {
@@ -90,9 +90,9 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({ snapshot }) => {
     });
     ctx.stroke();
 
-    // 2. Draw Speed series (Emerald)
+    // 2. Draw Speed series (Gray)
     const maxSpd = Math.max(...history.speed, 12.0);
-    ctx.strokeStyle = '#10b981';
+    ctx.strokeStyle = '#a1a1aa';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     history.speed.forEach((val, i) => {
@@ -103,9 +103,9 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({ snapshot }) => {
     });
     ctx.stroke();
 
-    // 3. Draw GPS Divergence series (Pink)
+    // 3. Draw GPS Divergence series (Subtle Muted Gray)
     const maxDiv = Math.max(...history.divergence, 10.0);
-    ctx.strokeStyle = '#ec4899';
+    ctx.strokeStyle = '#52525b';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([2, 2]);
     ctx.beginPath();
@@ -124,10 +124,10 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({ snapshot }) => {
 
   const batteryColor =
     (drone?.battery_percent ?? 100) > 40
-      ? '#10b981'
+      ? '#ffffff'
       : (drone?.battery_percent ?? 100) > 20
-      ? '#f59e0b'
-      : '#ef4444';
+      ? '#fbbf24'
+      : '#f87171';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: 8 }}>
@@ -142,49 +142,49 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({ snapshot }) => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <div
             style={{
-              background: '#090e17',
-              border: '1px solid #1e293b',
-              borderRadius: 6,
-              padding: '8px 12px',
+              background: '#181818',
+              border: 'none',
+              borderRadius: 12,
+              padding: '10px 14px',
             }}
           >
-            <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#94a3b8' }}>
+            <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#a1a1aa' }}>
               Altitude (MSL)
             </div>
-            <div className="mono" style={{ fontSize: 20, fontWeight: 700, color: '#06b6d4' }}>
+            <div className="mono" style={{ fontSize: 20, fontWeight: 700, color: '#ffffff' }}>
               {drone ? drone.altitude.toFixed(1) : '0.0'}
-              <span style={{ fontSize: 11, color: '#64748b', marginLeft: 4 }}>m</span>
+              <span style={{ fontSize: 11, color: '#71717a', marginLeft: 4 }}>m</span>
             </div>
-            <div style={{ fontSize: 10, color: '#94a3b8' }}>
+            <div style={{ fontSize: 10, color: '#71717a', marginTop: 2 }}>
               Climb: {drone ? drone.vertical_speed.toFixed(1) : '0.0'} m/s
             </div>
           </div>
 
           <div
             style={{
-              background: '#090e17',
-              border: '1px solid #1e293b',
-              borderRadius: 6,
-              padding: '8px 12px',
+              background: '#181818',
+              border: 'none',
+              borderRadius: 12,
+              padding: '10px 14px',
             }}
           >
-            <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#94a3b8' }}>
+            <div style={{ fontSize: 10, textTransform: 'uppercase', color: '#a1a1aa' }}>
               Ground Speed
             </div>
-            <div className="mono" style={{ fontSize: 20, fontWeight: 700, color: '#10b981' }}>
+            <div className="mono" style={{ fontSize: 20, fontWeight: 700, color: '#ffffff' }}>
               {drone ? drone.horizontal_speed.toFixed(1) : '0.0'}
-              <span style={{ fontSize: 11, color: '#64748b', marginLeft: 4 }}>m/s</span>
+              <span style={{ fontSize: 11, color: '#71717a', marginLeft: 4 }}>m/s</span>
             </div>
-            <div style={{ fontSize: 10, color: '#94a3b8' }}>
+            <div style={{ fontSize: 10, color: '#71717a', marginTop: 2 }}>
               Distance: {drone ? drone.distance_traveled.toFixed(0) : '0'} m
             </div>
           </div>
         </div>
 
         {/* Battery Capacity Gauge */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 4 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
-            <span style={{ color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ color: '#a1a1aa', display: 'flex', alignItems: 'center', gap: 6 }}>
               <Battery size={13} color={batteryColor} /> Battery Energy Reserve
             </span>
             <span className="mono" style={{ fontWeight: 700, color: batteryColor }}>
@@ -195,8 +195,8 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({ snapshot }) => {
             style={{
               width: '100%',
               height: 6,
-              background: '#1e293b',
-              borderRadius: 3,
+              background: '#222222',
+              borderRadius: 9999,
               overflow: 'hidden',
             }}
           >
@@ -205,6 +205,7 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({ snapshot }) => {
                 width: `${drone ? drone.battery_percent : 100}%`,
                 height: '100%',
                 backgroundColor: batteryColor,
+                borderRadius: 9999,
                 transition: 'width 0.2s linear',
               }}
             />
@@ -234,14 +235,14 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({ snapshot }) => {
 
         <div className="metric-row">
           <span className="metric-label">Filtered Position (X, Y):</span>
-          <span className="metric-val" style={{ color: '#06b6d4' }}>
+          <span className="metric-val" style={{ color: '#ffffff' }}>
             ({loc ? loc.filtered_x.toFixed(1) : '50.0'}, {loc ? loc.filtered_y.toFixed(1) : '50.0'}) m
           </span>
         </div>
 
         <div className="metric-row">
           <span className="metric-label">Raw GPS Position (X, Y):</span>
-          <span className="metric-val" style={{ color: '#ec4899' }}>
+          <span className="metric-val" style={{ color: '#a1a1aa' }}>
             ({loc ? loc.raw_x.toFixed(1) : '50.0'}, {loc ? loc.raw_y.toFixed(1) : '50.0'}) m
           </span>
         </div>
@@ -251,7 +252,7 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({ snapshot }) => {
           <span
             className="metric-val"
             style={{
-              color: (loc?.estimation_error_m ?? 0) > 5.0 ? '#ef4444' : '#10b981',
+              color: (loc?.estimation_error_m ?? 0) > 5.0 ? '#f87171' : '#ffffff',
             }}
           >
             {loc ? loc.estimation_error_m.toFixed(2) : '0.00'} m
@@ -264,16 +265,16 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({ snapshot }) => {
         <div className="section-header">
           <span>Real-time Telemetry Trend (Last 60 ticks)</span>
         </div>
-        <div style={{ display: 'flex', gap: 12, fontSize: 10, marginBottom: 4 }}>
-          <span style={{ color: '#06b6d4' }}>-- Altitude</span>
-          <span style={{ color: '#10b981' }}>-- Speed</span>
-          <span style={{ color: '#ec4899' }}>.. GPS Divergence</span>
+        <div style={{ display: 'flex', gap: 14, fontSize: 10, marginBottom: 6 }}>
+          <span style={{ color: '#ffffff' }}>-- Altitude</span>
+          <span style={{ color: '#a1a1aa' }}>-- Speed</span>
+          <span style={{ color: '#71717a' }}>.. GPS Divergence</span>
         </div>
         <canvas
           ref={chartCanvasRef}
           width={280}
           height={110}
-          style={{ width: '100%', height: 110, borderRadius: 4 }}
+          style={{ width: '100%', height: 110, borderRadius: 12 }}
         />
       </div>
     </div>

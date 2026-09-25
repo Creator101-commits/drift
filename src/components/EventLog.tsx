@@ -30,7 +30,7 @@ export const EventLog: React.FC<EventLogProps> = ({ events }) => {
             <button
               key={f}
               className={`btn btn-sm ${filter === f ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ fontSize: 9, padding: '1px 5px' }}
+              style={{ fontSize: 9, padding: '2px 8px', borderRadius: 9999 }}
               onClick={() => setFilter(f)}
             >
               {f}
@@ -43,53 +43,50 @@ export const EventLog: React.FC<EventLogProps> = ({ events }) => {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 4,
+          gap: 6,
           overflowY: 'auto',
           maxHeight: 220,
         }}
       >
         {filteredEvents.length === 0 ? (
-          <div style={{ padding: '12px 8px', textAlign: 'center', color: '#64748b', fontSize: 11 }}>
+          <div style={{ padding: '12px 8px', textAlign: 'center', color: '#71717a', fontSize: 11 }}>
             No mission events logged yet.
           </div>
         ) : (
-          filteredEvents.map((e) => (
-            <div
-              key={e.id}
-              style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: 8,
-                padding: '4px 6px',
-                background: '#090e17',
-                border: '1px solid #1a2538',
-                borderRadius: 4,
-                fontSize: 11,
-              }}
-            >
-              <span className="mono" style={{ fontSize: 9, color: '#64748b', flexShrink: 0 }}>
-                {e.timestamp}
-              </span>
-              <span
-                className="mono"
+          filteredEvents.map((e) => {
+            const isFault = e.event_type.includes('FAULT') || e.event_type.includes('COLLISION');
+            return (
+              <div
+                key={e.id}
                 style={{
-                  fontSize: 9,
-                  fontWeight: 700,
-                  color: e.event_type.includes('FAULT')
-                    ? '#f87171'
-                    : e.event_type.includes('COLLISION')
-                    ? '#ef4444'
-                    : e.event_type.includes('ROUTE')
-                    ? '#f59e0b'
-                    : '#38bdf8',
-                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: 8,
+                  padding: '6px 10px',
+                  background: '#161616',
+                  border: 'none',
+                  borderRadius: 10,
+                  fontSize: 11,
                 }}
               >
-                [{e.event_type}]
-              </span>
-              <span style={{ color: '#e2e8f0', wordBreak: 'break-word' }}>{e.description}</span>
-            </div>
-          ))
+                <span className="mono" style={{ fontSize: 9, color: '#71717a', flexShrink: 0 }}>
+                  {e.timestamp}
+                </span>
+                <span
+                  className="mono"
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: isFault ? '#f87171' : '#ffffff',
+                    flexShrink: 0,
+                  }}
+                >
+                  [{e.event_type}]
+                </span>
+                <span style={{ color: '#d4d4d8', wordBreak: 'break-word' }}>{e.description}</span>
+              </div>
+            );
+          })
         )}
       </div>
     </div>

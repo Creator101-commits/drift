@@ -148,7 +148,7 @@ export function App() {
 
   if (!scenario) {
     return (
-      <div style={{ padding: 40, color: '#06b6d4', fontFamily: 'monospace' }}>
+      <div style={{ padding: 40, color: '#ffffff', fontFamily: "'JetBrains Mono', 'Space Mono', monospace" }}>
         Loading Drift Mission Simulator...
       </div>
     );
@@ -171,7 +171,7 @@ export function App() {
                 width: 6,
                 height: 6,
                 borderRadius: '50%',
-                backgroundColor: 'currentColor',
+                backgroundColor: flightMode === 'disarmed' ? '#71717a' : '#22c55e',
               }}
             />
             {flightMode.replace(/_/g, ' ')}
@@ -179,7 +179,7 @@ export function App() {
 
           {/* Clock */}
           <div className="header-clock" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Clock size={14} color="#06b6d4" />
+            <Clock size={13} color="#a1a1aa" />
             <span>T+{simTime.toFixed(1)}s</span>
           </div>
 
@@ -190,11 +190,11 @@ export function App() {
               display: 'flex',
               alignItems: 'center',
               gap: 4,
-              fontSize: 12,
-              color: batteryPct > 30 ? '#10b981' : '#ef4444',
+              fontSize: 11,
+              color: '#ffffff',
             }}
           >
-            <Battery size={14} />
+            <Battery size={13} />
             <span>{batteryPct.toFixed(1)}%</span>
           </div>
 
@@ -204,7 +204,7 @@ export function App() {
             onClick={() => setShowSaveModal(true)}
             disabled={!snapshot || snapshot.sim_time_sec <= 0}
           >
-            <Save size={13} /> Save Run
+            <Save size={12} /> Save Run
           </button>
         </div>
       </header>
@@ -216,23 +216,15 @@ export function App() {
           <Panel defaultSize={26} minSize={20} maxSize={38}>
             <div className="panel-container">
               {/* Left Tab Switcher */}
-              <div
-                style={{
-                  display: 'flex',
-                  borderBottom: '1px solid #1e293b',
-                  background: '#0a0f18',
-                }}
-              >
+              <div className="tab-bar">
                 <button
-                  className={`btn btn-sm ${leftTab === 'controls' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ flex: 1, borderRadius: 0 }}
+                  className={`tab-btn ${leftTab === 'controls' ? 'active' : ''}`}
                   onClick={() => setLeftTab('controls')}
                 >
                   <Navigation size={12} /> Controls
                 </button>
                 <button
-                  className={`btn btn-sm ${leftTab === 'history' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ flex: 1, borderRadius: 0 }}
+                  className={`tab-btn ${leftTab === 'history' ? 'active' : ''}`}
                   onClick={() => setLeftTab('history')}
                 >
                   <History size={12} /> History
@@ -282,40 +274,30 @@ export function App() {
           <Panel defaultSize={26} minSize={22} maxSize={40}>
             <div className="panel-container">
               {/* Right Tab Switcher */}
-              <div
-                style={{
-                  display: 'flex',
-                  borderBottom: '1px solid #1e293b',
-                  background: '#0a0f18',
-                }}
-              >
+              <div className="tab-bar">
                 <button
-                  className={`btn btn-sm ${rightTab === 'telemetry' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ flex: 1, borderRadius: 0, padding: '6px 2px', fontSize: 11 }}
+                  className={`tab-btn ${rightTab === 'telemetry' ? 'active' : ''}`}
                   onClick={() => setRightTab('telemetry')}
                   title="Live Telemetry"
                 >
                   <Activity size={11} /> Telemetry
                 </button>
                 <button
-                  className={`btn btn-sm ${rightTab === 'sensors' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ flex: 1, borderRadius: 0, padding: '6px 2px', fontSize: 11 }}
+                  className={`tab-btn ${rightTab === 'sensors' ? 'active' : ''}`}
                   onClick={() => setRightTab('sensors')}
                   title="Sensor Health"
                 >
                   <Radio size={11} /> Sensors
                 </button>
                 <button
-                  className={`btn btn-sm ${rightTab === 'alerts' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ flex: 1, borderRadius: 0, padding: '6px 2px', fontSize: 11 }}
+                  className={`tab-btn ${rightTab === 'alerts' ? 'active' : ''}`}
                   onClick={() => setRightTab('alerts')}
                   title="Safety Alerts"
                 >
                   <ShieldAlert size={11} /> Alerts ({snapshot?.active_alerts.length ?? 0})
                 </button>
                 <button
-                  className={`btn btn-sm ${rightTab === 'events' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ flex: 1, borderRadius: 0, padding: '6px 2px', fontSize: 11 }}
+                  className={`tab-btn ${rightTab === 'events' ? 'active' : ''}`}
                   onClick={() => setRightTab('events')}
                   title="Event Log"
                 >
@@ -345,7 +327,7 @@ export function App() {
           <div className="modal-content">
             <div className="modal-title">Save Mission Run to SQLite Database</div>
             <div>
-              <label style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>
+              <label style={{ fontSize: 11, color: '#a1a1aa', display: 'block', marginBottom: 4 }}>
                 Mission Name
               </label>
               <input
@@ -357,7 +339,7 @@ export function App() {
               />
             </div>
             <div>
-              <label style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>
+              <label style={{ fontSize: 11, color: '#a1a1aa', display: 'block', marginBottom: 4 }}>
                 Engineering Notes / Description
               </label>
               <textarea
@@ -369,7 +351,7 @@ export function App() {
             </div>
 
             {saveSuccessMsg && (
-              <div style={{ fontSize: 12, color: '#38bdf8' }}>{saveSuccessMsg}</div>
+              <div style={{ fontSize: 12, color: '#22c55e' }}>{saveSuccessMsg}</div>
             )}
 
             <div className="modal-actions">

@@ -22,13 +22,13 @@ export const AlertPanel: React.FC<AlertPanelProps> = ({ alerts }) => {
       <div className="section-header">
         <span>Active Diagnostic & Safety Alerts</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <ShieldAlert size={13} color={alerts.length > 0 ? '#f59e0b' : '#10b981'} />
+          <ShieldAlert size={13} color={alerts.length > 0 ? '#f87171' : '#ffffff'} />
           <span className="mono">{alerts.length}</span>
         </div>
       </div>
 
       {alerts.length === 0 ? (
-        <div style={{ padding: '16px 8px', textAlign: 'center', color: '#64748b', fontSize: 11 }}>
+        <div style={{ padding: '16px 8px', textAlign: 'center', color: '#71717a', fontSize: 11 }}>
           All flight safety rules nominal. No active alerts.
         </div>
       ) : (
@@ -38,22 +38,18 @@ export const AlertPanel: React.FC<AlertPanelProps> = ({ alerts }) => {
             const isCritical = a.severity === 'critical';
             const isWarning = a.severity === 'warning';
 
-            const borderColor = isCritical ? '#ef4444' : isWarning ? '#f59e0b' : '#3b82f6';
-            const bgColor = isCritical
-              ? 'rgba(239, 68, 68, 0.1)'
-              : isWarning
-              ? 'rgba(245, 158, 11, 0.1)'
-              : 'rgba(59, 130, 246, 0.1)';
+            const severityColor = isCritical ? '#f87171' : isWarning ? '#fbbf24' : '#ffffff';
+            const bgColor = isCritical ? '#241212' : isWarning ? '#221910' : '#181818';
 
             return (
               <div
                 key={a.id}
                 style={{
                   background: bgColor,
-                  border: `1px solid ${borderColor}`,
-                  borderRadius: 5,
-                  padding: '8px 10px',
-                  opacity: isAck ? 0.6 : 1.0,
+                  border: 'none',
+                  borderRadius: 12,
+                  padding: '10px 12px',
+                  opacity: isAck ? 0.5 : 1.0,
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 4,
@@ -64,36 +60,34 @@ export const AlertPanel: React.FC<AlertPanelProps> = ({ alerts }) => {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 4,
+                      gap: 6,
                       fontWeight: 700,
                       fontSize: 10,
-                      color: borderColor,
+                      color: severityColor,
                       textTransform: 'uppercase',
                     }}
                   >
-                    {isCritical ? (
-                      <AlertTriangle size={12} />
-                    ) : isWarning ? (
-                      <AlertTriangle size={12} />
+                    {isCritical || isWarning ? (
+                      <AlertTriangle size={12} color={severityColor} />
                     ) : (
-                      <Info size={12} />
+                      <Info size={12} color={severityColor} />
                     )}
                     {a.alert_type.replace(/_/g, ' ')}
                   </span>
-                  <span className="mono" style={{ fontSize: 9, color: '#94a3b8' }}>
+                  <span className="mono" style={{ fontSize: 9, color: '#71717a' }}>
                     {a.timestamp}
                   </span>
                 </div>
 
-                <div style={{ fontSize: 11, color: '#f8fafc' }}>{a.description}</div>
+                <div style={{ fontSize: 11, color: '#ffffff' }}>{a.description}</div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 2 }}>
-                  <div style={{ fontSize: 10, color: '#94a3b8', fontStyle: 'italic' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+                  <div style={{ fontSize: 10, color: '#a1a1aa' }}>
                     Action: {a.suggested_action}
                   </div>
                   <button
                     className="btn btn-secondary btn-sm"
-                    style={{ padding: '1px 6px', fontSize: 9 }}
+                    style={{ padding: '2px 8px', fontSize: 9, borderRadius: 9999 }}
                     onClick={() => toggleAck(a.id)}
                   >
                     <Check size={10} /> {isAck ? 'Acked' : 'Ack'}
