@@ -119,8 +119,8 @@ fn get_simulation_state(state: State<'_, AppState>) -> SimulationSnapshot {
     if replayer.is_active {
         return replayer.get_current_snapshot();
     }
-    let mut engine = state.engine.lock().unwrap();
-    engine.step()
+    let engine = state.engine.lock().unwrap();
+    engine.current_snapshot()
 }
 
 #[tauri::command]
@@ -129,6 +129,15 @@ fn start_simulation(state: State<'_, AppState>) {
     engine.is_paused = false;
     let mut replayer = state.replayer.lock().unwrap();
     replayer.stop();
+
+    // If drone is disarmed on ground, auto-commence autonomous waypoint mission
+    if !engine.drone.state.armed && engine.drone.state.altitude < 1.0 {
+        let _ = engine.arm();
+        let _ = engine.takeoff(20.0);
+        if !engine.waypoints.is_empty() {
+            let _ = engine.select_waypoint(1);
+        }
+    }
 }
 
 #[tauri::command]
@@ -579,38 +588,39 @@ pub fn run() {
                     let (snapshot, new_events, new_alerts) = {
                         let mut engine = state.engine.lock().unwrap();
                         if engine.is_paused {
-                            continue;
-                        }
+                            let snap = engine.current_snapshot();
+                            (snap, Vec::new(), Vec::new())
+                        } else {
+                            let snap = engine.step();
 
-                        let snap = engine.step();
-
-                        // Accumulate telemetry for persistence/export (subsampled to 5 Hz to save memory)
-                        if snap.tick_count % 4 == 0 {
-                            let mut recorder = state.recorded_snapshots.lock().unwrap();
-                            if recorder.len() < 5000 {
-                                recorder.push(snap.clone());
+                            // Accumulate telemetry for persistence/export (subsampled to 5 Hz to save memory)
+                            if snap.tick_count % 4 == 0 {
+                                let mut recorder = state.recorded_snapshots.lock().unwrap();
+                                if recorder.len() < 5000 {
+                                    recorder.push(snap.clone());
+                                }
                             }
+
+                            let total_evts = engine.events.len();
+                            let new_evts = if total_evts > last_event_count {
+                                let evts = engine.events[last_event_count..total_evts].to_vec();
+                                last_event_count = total_evts;
+                                evts
+                            } else {
+                                Vec::new()
+                            };
+
+                            let total_alrts = engine.alert_manager.active_alerts.len();
+                            let new_alrts = if total_alrts > last_alert_count {
+                                let alrts = engine.alert_manager.active_alerts[last_alert_count..total_alrts].to_vec();
+                                last_alert_count = total_alrts;
+                                alrts
+                            } else {
+                                Vec::new()
+                            };
+
+                            (snap, new_evts, new_alrts)
                         }
-
-                        let total_evts = engine.events.len();
-                        let new_evts = if total_evts > last_event_count {
-                            let evts = engine.events[last_event_count..total_evts].to_vec();
-                            last_event_count = total_evts;
-                            evts
-                        } else {
-                            Vec::new()
-                        };
-
-                        let total_alrts = engine.alert_manager.active_alerts.len();
-                        let new_alrts = if total_alrts > last_alert_count {
-                            let alrts = engine.alert_manager.active_alerts[last_alert_count..total_alrts].to_vec();
-                            last_alert_count = total_alrts;
-                            alrts
-                        } else {
-                            Vec::new()
-                        };
-
-                        (snap, new_evts, new_alrts)
                     };
 
                     // Emit Tauri events to frontend

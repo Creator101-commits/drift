@@ -392,6 +392,15 @@ export async function startSimulation(): Promise<void> {
     await invoke('start_simulation');
   } else {
     browserSim.is_paused = false;
+    if (!browserSim.drone.armed && browserSim.drone.altitude < 1) {
+      browserSim.drone.armed = true;
+      browserSim.drone.flight_mode = 'takeoff';
+      browserSim.target_alt = 20;
+      browserSim.logEvent('TAKEOFF_INITIATED', 'Ascending to 20m hover');
+      setTimeout(() => {
+        selectWaypoint(1);
+      }, 1000);
+    }
   }
 }
 

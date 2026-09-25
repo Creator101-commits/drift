@@ -4,7 +4,7 @@ use drift_lib::navigation::{AStarPlanner, OccupancyGrid, SafetyMonitor, StateEst
 use drift_lib::replay::MissionExporter;
 use drift_lib::scripting::commands::parse_mission_script;
 use drift_lib::sensors::{FaultType, SensorSuite};
-use drift_lib::simulation::{Boundary, Drone, DronePhysicalConfig, FlightMode, Obstacle, Vec2};
+use drift_lib::simulation::{Boundary, Drone, DronePhysicalConfig, FlightMode, Obstacle, SimulationEngine, Vec2};
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 
@@ -188,4 +188,30 @@ fn test_database_persistence_and_export() {
     assert!(deleted);
     let after_delete = db.list_missions().unwrap();
     assert_eq!(after_delete.len(), 0);
+}
+
+#[test]
+fn test_simulation_engine_autonomous_routing_and_snapshot() {
+    let mut engine = SimulationEngine::new(42);
+    assert!(!engine.is_paused);
+    assert_eq!(engine.drone.state.flight_mode, FlightMode::Disarmed);
+
+    // Initial snapshot should be readable immediately
+    let initial_snap = engine.current_snapshot();
+    assert_eq!(initial_snap.drone.altitude, 0.0);
+    assert_eq!(initial_snap.tick_count, 0);
+
+    // Plan route should auto-arm and begin following route
+    let route = engine.plan_and_follow_route_to(100.0, 100.0, 20.0).expect("Should plan route");
+    assert!(route.len() >= 2);
+    assert!(engine.drone.state.armed);
+    assert!(matches!(engine.drone.state.flight_mode, FlightMode::WaypointFollow | FlightMode::Takeoff));
+
+    // Step simulation
+    for _ in 0..100 {
+        let snap = engine.step();
+        assert!(snap.tick_count > 0);
+    }
+
+    assert!(engine.drone.state.altitude > 10.0);
 }

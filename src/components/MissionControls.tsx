@@ -173,8 +173,12 @@ RETURN_HOME`
 
           <button
             className="btn btn-primary"
-            onClick={() => takeoff(takeoffAlt)}
-            disabled={!isArmed}
+            onClick={async () => {
+              if (!isArmed) {
+                await armDrone();
+              }
+              await takeoff(takeoffAlt);
+            }}
           >
             <ArrowUpCircle size={14} /> Takeoff
           </button>

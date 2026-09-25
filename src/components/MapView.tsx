@@ -28,8 +28,8 @@ export const MapView: React.FC<MapViewProps> = ({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Viewport transforms: pan and zoom
-  const [zoom, setZoom] = useState<number>(1.2);
-  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 40, y: 40 });
+  const [zoom, setZoom] = useState<number>(1.1);
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 180, y: 80 });
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [followDrone, setFollowDrone] = useState<boolean>(true);
@@ -65,14 +65,16 @@ export const MapView: React.FC<MapViewProps> = ({
   useEffect(() => {
     if (followDrone && snapshot && canvasRef.current) {
       const canvas = canvasRef.current;
-      const targetX = canvas.width / 2 - snapshot.drone.x * zoom;
-      const targetY = canvas.height / 2 - (canvas.height - snapshot.drone.y * zoom);
+      const width = canvas.parentElement?.clientWidth || canvas.clientWidth || 800;
+      const height = canvas.parentElement?.clientHeight || canvas.clientHeight || 600;
+      const targetX = width / 2 - snapshot.drone.x * zoom;
+      const targetY = height / 2 - snapshot.drone.y * zoom;
       setPan((prev) => ({
-        x: prev.x + (targetX - prev.x) * 0.1,
-        y: prev.y + (targetY - prev.y) * 0.1,
+        x: prev.x + (targetX - prev.x) * 0.15,
+        y: prev.y + (targetY - prev.y) * 0.15,
       }));
     }
-  }, [followDrone, snapshot, zoom]);
+  }, [followDrone, snapshot?.drone.x, snapshot?.drone.y, zoom]);
 
   // Main canvas render loop
   useEffect(() => {
@@ -502,8 +504,18 @@ export const MapView: React.FC<MapViewProps> = ({
         <button
           className="btn btn-secondary btn-sm"
           onClick={() => {
-            setZoom(1.2);
-            setPan({ x: 50, y: 50 });
+            const z = 1.1;
+            setZoom(z);
+            if (canvasRef.current) {
+              const width = canvasRef.current.parentElement?.clientWidth || canvasRef.current.clientWidth || 800;
+              const height = canvasRef.current.parentElement?.clientHeight || canvasRef.current.clientHeight || 600;
+              setPan({
+                x: width / 2 - 200 * z,
+                y: height / 2 - 200 * z,
+              });
+            } else {
+              setPan({ x: 180, y: 80 });
+            }
             setFollowDrone(false);
           }}
           title="Reset View"

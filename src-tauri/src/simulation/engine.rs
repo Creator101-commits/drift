@@ -84,6 +84,7 @@ pub struct SimulationEngine {
     pub is_paused: bool,
     pub time_step: f64, // dt = 0.05s (20 Hz)
     event_counter: usize,
+    pub last_sensor_readings: Vec<SensorReading>,
 }
 
 impl SimulationEngine {
@@ -123,9 +124,10 @@ impl SimulationEngine {
             seed,
             sim_time_sec: 0.0,
             tick_count: 0,
-            is_paused: true,
+            is_paused: false,
             time_step: Self::DT,
             event_counter: 0,
+            last_sensor_readings: Vec::new(),
         }
     }
 
@@ -160,7 +162,8 @@ impl SimulationEngine {
         self.current_route_index = 0;
         self.sim_time_sec = 0.0;
         self.tick_count = 0;
-        self.is_paused = true;
+        self.is_paused = false;
+        self.last_sensor_readings.clear();
         self.rng = ChaCha8Rng::seed_from_u64(self.seed);
     }
 
@@ -180,6 +183,7 @@ impl SimulationEngine {
 
     pub fn arm(&mut self) -> Result<(), String> {
         self.drone.arm()?;
+        self.is_paused = false;
         self.log_event("DRONE_ARMED", "Motors armed in ground standby", None);
         Ok(())
     }
@@ -190,6 +194,10 @@ impl SimulationEngine {
     }
 
     pub fn takeoff(&mut self, target_altitude: f64) -> Result<(), String> {
+        if !self.drone.state.armed {
+            self.arm()?;
+        }
+        self.is_paused = false;
         self.drone.takeoff(target_altitude)?;
         self.log_event(
             "TAKEOFF_INITIATED",
@@ -205,6 +213,7 @@ impl SimulationEngine {
     }
 
     pub fn return_to_home(&mut self) {
+        self.is_paused = false;
         self.drone.return_to_home();
         self.log_event("RTH_INITIATED", "Return-to-home fail-safe activated", None);
     }
@@ -224,6 +233,13 @@ impl SimulationEngine {
     }
 
     pub fn plan_and_follow_route_to(&mut self, goal_x: f64, goal_y: f64, altitude: f64) -> Result<Vec<Vec2>, String> {
+        if !self.drone.state.armed {
+            self.arm()?;
+        }
+        if self.drone.state.altitude < 1.0 {
+            self.drone.takeoff(altitude)?;
+        }
+        self.is_paused = false;
         let start_w = Vec2::new(self.drone.state.x, self.drone.state.y);
         let goal_w = Vec2::new(goal_x, goal_y);
 
@@ -363,10 +379,48 @@ impl SimulationEngine {
         );
 
         // 9. Construct and return snapshot
+        self.last_sensor_readings = sensor_readings.clone();
         SimulationSnapshot {
             drone: self.drone.state.clone(),
             localization: self.estimator.state.clone(),
             sensor_readings,
+            safety,
+            active_alerts: self.alert_manager.active_alerts.clone(),
+            recent_events: self.events.iter().rev().take(50).cloned().collect(),
+            sim_time_sec: (self.sim_time_sec * 100.0).round() / 100.0,
+            tick_count: self.tick_count,
+            planned_route: self.planned_route.clone(),
+            raw_trail: self.estimator.raw_trail.clone(),
+            filtered_trail: self.estimator.filtered_trail.clone(),
+            active_faults: self.sensors.active_faults.clone(),
+            wind_vector: wind_vec,
+            is_script_running: self.script_runner.is_running,
+            current_script_step: self.script_runner.current_step,
+            total_script_steps: self.script_runner.commands.len(),
+        }
+    }
+
+    /// Read instantaneous simulation snapshot without advancing kinematic state.
+    pub fn current_snapshot(&self) -> SimulationSnapshot {
+        let wind_vec = self.wind.velocity_at(self.sim_time_sec);
+        let lidar_min_dist = self.last_sensor_readings
+            .iter()
+            .find(|r| r.sensor_name.starts_with("LiDAR"))
+            .and_then(|r| r.values.get("min_distance_m").and_then(|v| v.as_f64()))
+            .unwrap_or(35.0);
+
+        let safety = SafetyMonitor::evaluate(
+            &self.drone.state,
+            &self.drone.config,
+            &self.boundary,
+            &self.obstacles,
+            lidar_min_dist,
+        );
+
+        SimulationSnapshot {
+            drone: self.drone.state.clone(),
+            localization: self.estimator.state.clone(),
+            sensor_readings: self.last_sensor_readings.clone(),
             safety,
             active_alerts: self.alert_manager.active_alerts.clone(),
             recent_events: self.events.iter().rev().take(50).cloned().collect(),
@@ -392,7 +446,7 @@ impl SimulationEngine {
         let drone_pos = Vec2::new(self.drone.state.x, self.drone.state.y);
         let dist = drone_pos.distance_to(&target_pt);
 
-        if dist < 2.0 {
+        if dist < 2.5 {
             // Reached this path point
             self.current_route_index += 1;
             if self.current_route_index < self.planned_route.len() {
@@ -406,8 +460,16 @@ impl SimulationEngine {
                 });
             } else {
                 // Route complete
+                self.log_event("ROUTE_COMPLETED", "Final route waypoint reached", None);
+                if let Some(wp_id) = self.drone.state.current_waypoint_index {
+                    if let Some(next_wp) = self.waypoints.iter().find(|w| w.id == wp_id + 1).cloned() {
+                        let _ = self.plan_and_follow_route_to(next_wp.x, next_wp.y, next_wp.altitude);
+                        self.drone.state.current_waypoint_index = Some(next_wp.id);
+                        self.log_event("WAYPOINT_ADVANCED", &format!("Autonomous progression to waypoint #{}", next_wp.id), None);
+                        return;
+                    }
+                }
                 self.drone.hover();
-                self.log_event("ROUTE_COMPLETED", "Final route waypoint reached, holding station", None);
             }
         }
     }
