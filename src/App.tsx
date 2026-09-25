@@ -148,8 +148,34 @@ export function App() {
 
   if (!scenario) {
     return (
-      <div style={{ padding: 40, color: '#ffffff', fontFamily: "'JetBrains Mono', 'Space Mono', monospace" }}>
-        Loading Drift Mission Simulator...
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          width: '100vw',
+          backgroundColor: '#000000',
+          color: '#ffffff',
+          gap: 12,
+        }}
+      >
+        <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: 4, textTransform: 'uppercase' }}>
+          DRIFT
+        </div>
+        <div style={{ fontSize: 11, color: '#71717a', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              backgroundColor: '#22c55e',
+              display: 'inline-block',
+            }}
+          />
+          Initializing autonomous flight simulation engine...
+        </div>
       </div>
     );
   }
@@ -201,6 +227,7 @@ export function App() {
           {/* Save Mission Button */}
           <button
             className="btn btn-primary btn-sm"
+            style={{ borderRadius: 9999, padding: '5px 12px' }}
             onClick={() => setShowSaveModal(true)}
             disabled={!snapshot || snapshot.sim_time_sec <= 0}
           >

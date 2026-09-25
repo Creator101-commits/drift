@@ -163,6 +163,7 @@ body, html, #root {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .section-header {
@@ -186,6 +187,7 @@ body, html, #root {
   margin: 6px 8px;
   background-color: #121212;
   border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
 }
 
 .tab-btn {
@@ -230,6 +232,16 @@ body, html, #root {
   transition: all 0.12s ease;
   border: none;
   outline: none;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .btn-primary {

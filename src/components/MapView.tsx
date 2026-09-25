@@ -382,38 +382,72 @@ export const MapView: React.FC<MapViewProps> = ({
       // Rotate canvas for drone heading (0 deg North = straight up in canvas)
       ctx.rotate(headingRad);
 
-      // Drone Body (Delta Quadcopter Icon)
+      // Forward LiDAR / optical flow sensor cone
       ctx.beginPath();
-      ctx.moveTo(0, -14); // Nose
-      ctx.lineTo(10, 10);
-      ctx.lineTo(0, 6);
-      ctx.lineTo(-10, 10);
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-10, -26);
+      ctx.lineTo(10, -26);
       ctx.closePath();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.fill();
 
+      // Quadcopter frame arms
+      ctx.strokeStyle = '#3f3f46';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-10, -10);
+      ctx.lineTo(10, 10);
+      ctx.moveTo(-10, 10);
+      ctx.lineTo(10, -10);
+      ctx.stroke();
+
+      // Four rotor discs
+      [[-10, -10], [10, -10], [-10, 10], [10, 10]].forEach(([rx, ry]) => {
+        ctx.beginPath();
+        ctx.arc(rx, ry, 4, 0, Math.PI * 2);
+        ctx.fillStyle = snapshot.drone.armed ? 'rgba(255, 255, 255, 0.2)' : '#181818';
+        ctx.fill();
+        ctx.strokeStyle = snapshot.drone.armed ? '#ffffff' : '#52525b';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+
+      // Drone Central Fuselage (Directional Delta)
+      ctx.beginPath();
+      ctx.moveTo(0, -13);
+      ctx.lineTo(8, 7);
+      ctx.lineTo(0, 3);
+      ctx.lineTo(-8, 7);
+      ctx.closePath();
       ctx.fillStyle = snapshot.drone.armed ? '#ffffff' : '#3f3f46';
       ctx.fill();
       ctx.strokeStyle = '#000000';
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // Forward sensor cone
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(-8, -24);
-      ctx.lineTo(8, -24);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
-      ctx.fill();
-
       ctx.restore();
 
-      // Drone telemetry tag text
+      // Live Telemetry HUD Tag with rounded background pill
+      const tagW = 76;
+      const tagH = 28;
+      const tagX = dronePt.cx + 14;
+      const tagY = dronePt.cy - 14;
+
+      ctx.fillStyle = 'rgba(18, 18, 18, 0.88)';
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(tagX, tagY, tagW, tagH, 6);
+      } else {
+        ctx.rect(tagX, tagY, tagW, tagH);
+      }
+      ctx.fill();
+
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 10px "JetBrains Mono", monospace';
-      ctx.fillText(`ALT: ${snapshot.drone.altitude.toFixed(1)}m`, dronePt.cx + 14, dronePt.cy - 8);
-      ctx.fillStyle = '#71717a';
-      ctx.font = '9px "JetBrains Mono", monospace';
-      ctx.fillText(`${snapshot.drone.horizontal_speed.toFixed(1)} m/s`, dronePt.cx + 14, dronePt.cy + 4);
+      ctx.font = 'bold 9px "JetBrains Mono", monospace';
+      ctx.fillText(`ALT ${snapshot.drone.altitude.toFixed(1)}m`, tagX + 6, tagY + 11);
+      ctx.fillStyle = '#a1a1aa';
+      ctx.font = '8px "JetBrains Mono", monospace';
+      ctx.fillText(`${snapshot.drone.horizontal_speed.toFixed(1)} m/s`, tagX + 6, tagY + 22);
     }
 
     ctx.restore();

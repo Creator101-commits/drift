@@ -115,7 +115,7 @@ RETURN_HOME`
           <option value="SCN-URBAN-01">Urban Grid Surveillance (400m)</option>
           <option value="SCN-CANYON-02">Canyon Wind Obstacle Challenge</option>
         </select>
-        <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.3 }}>
+        <div style={{ fontSize: 11, color: '#a1a1aa', lineHeight: 1.4 }}>
           {scenario.description}
         </div>
       </div>
@@ -142,7 +142,7 @@ RETURN_HOME`
             <button
               key={spd}
               className={`btn btn-sm ${activeSpeed === spd ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ flex: 1 }}
+              style={{ flex: 1, borderRadius: 9999, fontSize: 10, padding: '3px 0' }}
               onClick={() => handleSpeedChange(spd)}
             >
               {spd}x
@@ -320,7 +320,7 @@ RETURN_HOME`
           <button
             className="btn btn-secondary btn-sm"
             onClick={() =>
-              setScriptText(`TAKEOFF 15\nWAIT 3\nGOTO 190 90 20\nINJECT LIDAR_FAILURE\nWAIT 5\nRETURN_HOME`)
+              setScriptText(`TAKEOFF 15\nWAIT 3\nGOTO 190 90 20\nINJECT LIDAR_BLIND_SPOT\nWAIT 5\nRETURN_HOME`)
             }
           >
             Preset 2
