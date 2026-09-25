@@ -23,6 +23,7 @@ import {
   startReplay,
 } from './api';
 import { AlertPanel } from './components/AlertPanel';
+import { DriftLogo } from './components/DriftLogo';
 import { EventLog } from './components/EventLog';
 import { MapView } from './components/MapView';
 import { MissionControls } from './components/MissionControls';
@@ -158,9 +159,10 @@ export function App() {
           width: '100vw',
           backgroundColor: '#000000',
           color: '#ffffff',
-          gap: 12,
+          gap: 16,
         }}
       >
+        <DriftLogo size={52} />
         <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: 4, textTransform: 'uppercase' }}>
           DRIFT
         </div>
@@ -185,8 +187,11 @@ export function App() {
       {/* 1. Header Toolbar */}
       <header className="app-header">
         <div className="brand-section">
-          <div className="brand-title">Drift</div>
-          <div className="brand-subtitle">Autonomous Drone Telemetry Analyzer</div>
+          <DriftLogo size={24} />
+          <div>
+            <div className="brand-title">Drift</div>
+            <div className="brand-subtitle">Autonomous Drone Telemetry Analyzer</div>
+          </div>
         </div>
 
         <div className="header-status-group">
